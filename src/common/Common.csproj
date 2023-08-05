@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
+
+  <PropertyGroup>
+    <AssemblyName>Rimrock.Helios.Common</AssemblyName>
+    <RootNamespace>Rimrock.Helios.Common</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="$(System_CommandLine)" />
+  </ItemGroup>
+</Project>
