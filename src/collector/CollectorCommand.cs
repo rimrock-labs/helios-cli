@@ -3,8 +3,8 @@ namespace Rimrock.Helios.Collector
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using Rimrock.Helios.Common.Commands;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Common.Commands;
 
     /// <summary>
     /// Collector command class.
@@ -28,8 +28,10 @@ namespace Rimrock.Helios.Collector
         /// <inheritdoc />
         public IReadOnlyList<Command> GetCommand()
         {
-            Command command = new(this.Name, description: "Collects a profile.");
-            command.AddOption(new Option<string[]>("--data-set", description: "Data sets to collect.") { IsRequired = true });
+            Command command = new(this.Name, description: "Collects data from the current machine.");
+            command.AddOption(new Option<string[]>("--data-analyzers", description: "Data sets to collect.", getDefaultValue: () => new[] { "CPU" }).FromAmong("CPU"));
+            command.AddOption(new Option<int[]>("--process-ids", description: "Process identifiers to focus the data to."));
+            command.AddOption(new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { "CSV" }).FromAmong("CSV"));
             command.SetHandler(this.Collect);
             return new[] { command };
         }

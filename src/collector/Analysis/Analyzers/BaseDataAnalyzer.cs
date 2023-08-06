@@ -92,7 +92,11 @@ namespace Rimrock.Helios.Analysis.Analyzers
 
         private string GetAnalyzerName()
         {
-            CustomAttributeData attribute = this.GetType().GetCustomAttributesData().Where(_ => _.AttributeType == typeof(DataAnalyzerAttribute)).FirstOrDefault() ?? throw new InvalidOperationException("Analyzer is missing [DataAnalyzer] attribute.");
+            CustomAttributeData attribute = this.GetType().
+                GetCustomAttributesData().
+                Where(_ => _.AttributeType == typeof(DataAnalyzerAttribute)).
+                FirstOrDefault() ??
+                    throw new InvalidOperationException("Analyzer is missing [DataAnalyzer] attribute.");
             return ((string?)attribute.NamedArguments[0].TypedValue.Value) ?? "Unknown";
         }
     }
