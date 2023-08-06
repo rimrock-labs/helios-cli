@@ -1,14 +1,14 @@
 namespace Rimrock.Helios.Analysis.Analyzers
 {
-    using Rimrock.Helios.Analysis.Views;
-    using Rimrock.Helios.Common;
     using Microsoft.Diagnostics.Tracing;
     using Microsoft.Diagnostics.Tracing.Etlx;
     using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Analysis.Views;
+    using Rimrock.Helios.Common;
 
+    [DataAnalyzer(Name = "CPU")]
     [WindowsProfilingDefinition(
-        "CPU",
         ClrEvents = new[] { "Loader", "Stack" },
         KernelEvents = new[] { "Process", "Profile", "ImageLoad" })]
     internal class CpuDataAnalyzer : BaseDataAnalyzer

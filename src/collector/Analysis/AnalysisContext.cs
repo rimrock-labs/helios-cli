@@ -10,28 +10,28 @@ namespace Rimrock.Helios.Analysis
     public class AnalysisContext
     {
         /// <summary>
-        /// Gets or sets the working directory.
+        /// Gets the working directory.
         /// </summary>
-        public required string WorkingDirectory { get; set; }
+        public required string WorkingDirectory { get; init; }
 
         /// <summary>
-        /// Gets or sets the path of the trace being analyzed.
+        /// Gets the path of the trace being analyzed.
         /// </summary>
-        public required string TracePath { get; set; }
+        public required string TracePath { get; init; }
 
         /// <summary>
-        /// Gets or sets the symbol store.
+        /// Gets the symbol store.
         /// </summary>
-        public required SymbolStore Symbols { get; set; }
+        public required SymbolStore Symbols { get; init; }
 
         /// <summary>
-        /// Gets or sets the enabled analyzers.
+        /// Gets the enabled analyzers.
         /// </summary>
-        public required IReadOnlyList<IDataAnalyzer> Analyzers { get; set; }
+        public required IReadOnlyList<IDataAnalyzer> Analyzers { get; init; }
 
         /// <summary>
-        /// Gets or sets the views.
+        /// Gets the views.
         /// </summary>
-        public required IReadOnlySet<Type> Views { get; set; }
+        public required IReadOnlySet<Type> Views { get; init; }
     }
 }

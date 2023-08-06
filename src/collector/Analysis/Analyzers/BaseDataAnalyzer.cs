@@ -2,9 +2,11 @@ namespace Rimrock.Helios.Analysis.Analyzers
 {
     using System;
     using System.Collections.Generic;
-    using Rimrock.Helios.Analysis.Views;
+    using System.Linq;
+    using System.Reflection;
     using Microsoft.Diagnostics.Tracing;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Analysis.Views;
 
     /// <summary>
     /// Base data analyzer class.
@@ -43,11 +45,16 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// <inheritdoc />
         public virtual void OnEnd(AnalysisContext context)
         {
+            AnalyzerContext analyzerContext = new()
+            {
+                AnalyzerName = this.GetAnalyzerName(),
+            };
+
             foreach (IView view in this.views)
             {
                 if (this.models.TryGetValue(view.ModelType, out IModel? model))
                 {
-                    view.Save(context, model);
+                    view.Save(analyzerContext, context, model);
                 }
             }
         }
@@ -81,6 +88,12 @@ namespace Rimrock.Helios.Analysis.Analyzers
                 IModel model = (IModel)Activator.CreateInstance(modelType)!;
                 this.models[modelType] = model;
             }
+        }
+
+        private string GetAnalyzerName()
+        {
+            CustomAttributeData attribute = this.GetType().GetCustomAttributesData().Where(_ => _.AttributeType == typeof(DataAnalyzerAttribute)).FirstOrDefault() ?? throw new InvalidOperationException("Analyzer is missing [DataAnalyzer] attribute.");
+            return ((string?)attribute.NamedArguments[0].TypedValue.Value) ?? "Unknown";
         }
     }
 }

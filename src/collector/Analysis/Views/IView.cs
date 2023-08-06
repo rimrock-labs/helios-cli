@@ -1,6 +1,7 @@
 namespace Rimrock.Helios.Analysis.Views
 {
     using System;
+    using Rimrock.Helios.Analysis.Analyzers;
 
     /// <summary>
     /// View interface.
@@ -15,8 +16,9 @@ namespace Rimrock.Helios.Analysis.Views
         /// <summary>
         /// Saves this view.
         /// </summary>
+        /// <param name="analyzer">The analyzer context.</param>
         /// <param name="context">The context.</param>
         /// <param name="model">The model.</param>
-        void Save(AnalysisContext context, IModel model);
+        void Save(AnalyzerContext analyzer, AnalysisContext context, IModel model);
     }
 }
