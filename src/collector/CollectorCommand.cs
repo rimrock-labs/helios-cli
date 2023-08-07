@@ -4,6 +4,7 @@ namespace Rimrock.Helios.Collector
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.IO;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Collection;
     using Rimrock.Helios.Common.Commands;
@@ -50,9 +51,12 @@ namespace Rimrock.Helios.Collector
 
             PerfViewAgent.Configuration configuration = new()
             {
+                PerfViewPath = Path.Combine(Directory.GetCurrentDirectory(), "PerfView", "PerfView.exe"),
                 WorkingDirectory = context.ParseResult.GetValueForOption(OutputDirectory)!,
                 OutputName = $"Helios-{Environment.MachineName}-{DateTimeOffset.UtcNow:u}",
                 Duration = context.ParseResult.GetValueForOption(Duration),
+                KernelEvents = Array.Empty<string>(),
+                ClrEvents = Array.Empty<string>(),
             };
 
             using PerfViewAgent agent = PerfViewAgent.Start(configuration);

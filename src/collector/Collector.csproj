@@ -14,4 +14,37 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="System.CommandLine" Version="$(System_CommandLine)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(PkgPerfView)\PerfView.exe">
+      <Link>PerfView/PerfView.exe</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(PkgMicrosoft_Diagnostics_Tracing_TraceEvent)\build\native\x86\msvcp140.dll">
+      <Link>x86\msvcp140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(PkgMicrosoft_Diagnostics_Tracing_TraceEvent)\build\native\x86\vcruntime140.dll">
+      <Link>x86\vcruntime140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(PkgMicrosoft_Diagnostics_Tracing_TraceEvent)\build\native\amd64\msvcp140.dll">
+      <Link>amd64\msvcp140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(PkgMicrosoft_Diagnostics_Tracing_TraceEvent)\build\native\amd64\vcruntime140.dll">
+      <Link>amd64\vcruntime140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(PkgMicrosoft_Diagnostics_Tracing_TraceEvent)\build\native\amd64\vcruntime140_1.dll">
+      <Link>amd64\vcruntime140_1.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
 </Project>

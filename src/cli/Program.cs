@@ -27,8 +27,8 @@
         public static async Task<int> Main(string[] args)
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false)
-                .AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true)
+                .AddJsonFile("helios-cli.json", optional: false)
+                .AddJsonFile($"helios-cli.{Environment.MachineName}.json", optional: true)
                 .AddEnvironmentVariables()
                 .Build();
 
