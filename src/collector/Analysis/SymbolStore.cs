@@ -4,7 +4,6 @@ namespace Rimrock.Helios.Analysis
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using Rimrock.Helios.Common;
     using Microsoft.Diagnostics.Symbols;
     using Microsoft.Diagnostics.Tracing.Etlx;
     using Microsoft.Extensions.Logging;
@@ -55,23 +54,18 @@ namespace Rimrock.Helios.Analysis
         /// <returns>true if successful, false otherwise.</returns>
         public bool TryResolve(
             TraceCallStack? inStack,
-            [NotNullWhen(true)] out DataFrame? outStack)
+            [NotNullWhen(true)] out Frame? outStack)
         {
             bool result = false;
             outStack = default;
-            DataFrame? previous = default;
+            Frame? previous = default;
             if (inStack != null)
             {
                 while (inStack != null)
                 {
                     this.ResolveCodeAddress(inStack.CodeAddress, out string moduleName, out string methodName);
 
-                    DataFrame frame = new()
-                    {
-                        ModuleName = moduleName,
-                        MethodName = methodName,
-                    };
-
+                    Frame frame = new(moduleName, methodName);
                     if (previous == null)
                     {
                         outStack = previous = frame;
@@ -79,7 +73,8 @@ namespace Rimrock.Helios.Analysis
                     }
                     else
                     {
-                        frame.AddChild(previous);
+                        previous.Caller = frame;
+                        frame.Callee = previous;
                         previous = frame;
                     }
 

@@ -5,7 +5,6 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Analysis.Views;
-    using Rimrock.Helios.Common;
 
     [DataAnalyzer(Name = "CPU")]
     [WindowsProfilingDefinition(
@@ -21,12 +20,14 @@ namespace Rimrock.Helios.Analysis.Analyzers
         public override void OnData(AnalysisContext context, TraceEvent traceEvent)
         {
             if (traceEvent is SampledProfileTraceData &&
-                context.Symbols.TryResolve(traceEvent.CallStack(), out DataFrame? frame))
+                context.Symbols.TryResolve(traceEvent.CallStack(), out Frame? frame))
             {
-                WeightedGraphData data = new(frame);
+                CallStackData data = new(frame);
 
                 // TODO: add additional predefined tags
                 data.AddProcessTag(traceEvent.ProcessName);
+
+                this.AddData(data);
             }
         }
     }

@@ -1,9 +1,12 @@
 namespace Rimrock.Helios.Collector
 {
+    using System;
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Collection;
+    using Rimrock.Helios.Common;
     using Rimrock.Helios.Common.Commands;
 
     /// <summary>
@@ -11,6 +14,7 @@ namespace Rimrock.Helios.Collector
     /// </summary>
     public class CollectorCommand : ICommand
     {
+        private static readonly Option<string> OutputDirectory = new("--output-directory", description: "Output directory.") { IsRequired = true };
         private readonly ILogger logger;
 
         /// <summary>
@@ -29,9 +33,11 @@ namespace Rimrock.Helios.Collector
         public IReadOnlyList<Command> GetCommand()
         {
             Command command = new(this.Name, description: "Collects data from the current machine.");
+            command.AddOption(OutputDirectory);
             command.AddOption(new Option<string[]>("--data-analyzers", description: "Data sets to collect.", getDefaultValue: () => new[] { "CPU" }).FromAmong("CPU"));
             command.AddOption(new Option<int[]>("--process-ids", description: "Process identifiers to focus the data to."));
             command.AddOption(new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { "CSV" }).FromAmong("CSV"));
+            command.AddOption(new Option<TimeSpan>("--duration", description: "Duration of collection.", getDefaultValue: () => TimeSpan.FromMinutes(1)));
             command.SetHandler(this.Collect);
             return new[] { command };
         }
@@ -40,6 +46,23 @@ namespace Rimrock.Helios.Collector
         {
             context.Console.WriteLine("Collect!");
             this.logger.LogInformation("[Collect] Collector!");
+
+            PerfViewAgent.Configuration configuration = new()
+            {
+                WorkingDirectory = context.ParseResult.GetValueForOption(OutputDirectory)!,
+                OutputName = $"Helios-{Environment.MachineName}-{DateTimeOffset.UtcNow:u}",
+            };
+
+            if (context.ParseResult.TryGetParsedOptionValue < TimeSpan >
+            configuration.Duration
+            using PerfViewAgent agent = PerfViewAgent.Start(configuration);
+
+            this.Analyze(context);
+        }
+
+        private void Analyze(InvocationContext context)
+        {
+
         }
     }
 }
