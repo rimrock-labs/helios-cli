@@ -42,8 +42,8 @@
             bool verbose = new Parser(command).Parse(args).GetValueForOption(verboseOptions);
             ILoggerFactory loggerFactory = LoggerFactory.Create(_ =>
             {
-                _.AddFilter("App", verbose ? LogLevel.Information : LogLevel.Error);
-                _.AddFilter("Command", verbose ? LogLevel.Information : LogLevel.Error);
+                _.AddFilter("App", verbose ? LogLevel.Trace : LogLevel.Warning);
+                _.AddFilter("Command", verbose ? LogLevel.Trace : LogLevel.Warning);
                 _.AddSimpleConsole(ConfigureConsole);
             });
 
@@ -94,8 +94,7 @@
         private static void ConfigureConsole(SimpleConsoleFormatterOptions console)
         {
             console.IncludeScopes = false;
-            console.SingleLine = true;
-            console.TimestampFormat = "u";
+            console.TimestampFormat = "yyyy-MM-dd hh:mm:ssZ ";
         }
 
         private static void AddCommands(RootCommand rootCommand, IReadOnlyCollection<Command> subCommands)

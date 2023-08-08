@@ -5,8 +5,10 @@ namespace Rimrock.Helios.Collector
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
+    using System.Text.Json;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Collection;
+    using Rimrock.Helios.Common;
     using Rimrock.Helios.Common.Commands;
 
     /// <summary>
@@ -46,21 +48,23 @@ namespace Rimrock.Helios.Collector
 
         private void Collect(InvocationContext context)
         {
-            context.Console.WriteLine("Collect!");
-            this.logger.LogInformation("[Collect] Collector!");
-
+            StringMacros pathMacros = new();
+            string outputDirectory = context.ParseResult.GetValueForOption(OutputDirectory)!;
+            outputDirectory = Environment.ExpandEnvironmentVariables(outputDirectory);
             PerfViewAgent.Configuration configuration = new()
             {
-                PerfViewPath = Path.Combine(Directory.GetCurrentDirectory(), "PerfView", "PerfView.exe"),
-                WorkingDirectory = context.ParseResult.GetValueForOption(OutputDirectory)!,
-                OutputName = $"Helios-{Environment.MachineName}-{DateTimeOffset.UtcNow:u}",
+                PerfViewPath = Path.Combine(HeliosEnvironment.Instance.ApplicationDirectory, "PerfView", "PerfView.exe"),
+                WorkingDirectory = pathMacros.Expand(outputDirectory),
+                OutputName = $"Helios-{Environment.MachineName}-{DateTimeOffset.UtcNow:yyyyMMdd-hhmmss}",
                 Duration = context.ParseResult.GetValueForOption(Duration),
                 KernelEvents = Array.Empty<string>(),
                 ClrEvents = Array.Empty<string>(),
             };
 
-            using PerfViewAgent agent = PerfViewAgent.Start(configuration);
-            agent.Wait();
+            Console.WriteLine(JsonSerializer.Serialize(configuration, new JsonSerializerOptions() { WriteIndented = true }));
+
+            using PerfViewAgent agent = PerfViewAgent.Start(this.logger, FileSystem.Instance, configuration);
+            //agent.Wait();
 
             this.Analyze(context);
         }

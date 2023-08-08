@@ -12,7 +12,9 @@
     <Content Include="helios-cli.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <AdditionalFiles Include="..\stylecop.json" />
+    <Content Include="test-collect.rsp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
