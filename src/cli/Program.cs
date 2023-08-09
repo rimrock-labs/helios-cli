@@ -13,7 +13,6 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Console;
     using Microsoft.Extensions.Options;
     using Rimrock.Helios.Cli.Configuration;
     using Rimrock.Helios.Common;
@@ -62,6 +61,16 @@
                     })
                 .Build();
 
+            LoadCommands(host, command);
+
+            return new CommandLineBuilder(command)
+                .UseDefaults()
+                .Build()
+                .InvokeAsync(args);
+        }
+
+        private static void LoadCommands(IHost host, RootCommand command)
+        {
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
             IOptions<AppSettings> options = host.Services.GetRequiredService<IOptions<AppSettings>>();
             AppSettings settings = options.Value;
@@ -84,16 +93,11 @@
                         if (type.IsAssignableTo(typeof(ICommand)))
                         {
                             ICommand childCommand = (ICommand)ActivatorUtilities.CreateInstance(host.Services, type);
-                            AddCommands(command, childCommand.GetCommand(host.Services));
+                            AddCommands(command, childCommand.GetCommand());
                         }
                     }
                 }
             }
-
-            return new CommandLineBuilder(command)
-                .UseDefaults()
-                .Build()
-                .InvokeAsync(args);
         }
 
         private static void AddCommands(RootCommand rootCommand, IReadOnlyCollection<Command> subCommands)

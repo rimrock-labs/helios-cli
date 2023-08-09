@@ -1,6 +1,5 @@
 namespace Rimrock.Helios.Common.Commands
 {
-    using System;
     using System.Collections.Generic;
     using System.CommandLine;
 
@@ -17,8 +16,7 @@ namespace Rimrock.Helios.Common.Commands
         /// <summary>
         /// Gets the commands supported by this command.
         /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
         /// <returns>A collection of commands.</returns>
-        public IReadOnlyList<Command> GetCommand(IServiceProvider serviceCollection);
+        public IReadOnlyList<Command> GetCommand();
     }
 }

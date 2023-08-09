@@ -13,7 +13,7 @@ namespace Rimrock.Helios.Analysis
     /// </summary>
     public sealed class SymbolStore : IDisposable
     {
-        private readonly ILogger logger;
+        private readonly ILogger<SymbolStore> logger;
         private readonly TextWriter readerLog;
         private readonly SymbolReader reader;
 
@@ -27,19 +27,17 @@ namespace Rimrock.Helios.Analysis
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolStore"/> class.
         /// </summary>
-        /// <param name="context">The analysis context.</param>
         /// <param name="logger">The logger.</param>
-        public SymbolStore(
-            AnalysisContext context,
-            ILogger logger)
+        /// <param name="outputLogPath">The output log path.</param>
+        /// <param name="symbolPath">The symbol path.</param>
+        public SymbolStore(ILogger<SymbolStore> logger, string outputLogPath, string symbolPath)
         {
             this.logger = logger;
 
-            string readerLogPath = context.TracePath + ".symbols.log";
-            this.readerLog = TextWriter.Synchronized(new StreamWriter(readerLogPath));
+            this.readerLog = TextWriter.Synchronized(new StreamWriter(outputLogPath));
 
             // TODO: make symbol path configurable
-            this.reader = new SymbolReader(this.readerLog, SymbolPath.SymbolPathFromEnvironment);
+            this.reader = new SymbolReader(this.readerLog, symbolPath);
 
             this.missingModuleSymbols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             this.moduleNameCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
