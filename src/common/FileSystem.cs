@@ -8,6 +8,13 @@ namespace Rimrock.Helios.Common
     public class FileSystem
     {
         /// <summary>
+        /// <see cref="System.IO.Directory.CreateDirectory(string)"/> wrapper.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        public virtual void CreateDirectory(string path) =>
+            Directory.CreateDirectory(path);
+
+        /// <summary>
         /// <see cref="System.IO.File.Exists(string?)"/> wrapper.
         /// </summary>
         /// <param name="path">The file path.</param>

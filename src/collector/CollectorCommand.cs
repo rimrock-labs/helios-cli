@@ -21,23 +21,23 @@ namespace Rimrock.Helios.Collector
         private static readonly Option<TimeSpan> Duration = new("--duration", description: "Duration of collection.", getDefaultValue: () => TimeSpan.FromMinutes(1));
 
         private readonly ILogger<CollectorCommand> logger;
-        private readonly FileSystem fileSystem;
         private readonly HeliosEnvironment environment;
+        private readonly IServiceProvider services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CollectorCommand"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        /// <param name="fileSystem">The file system.</param>
         /// <param name="environment">The environment.</param>
+        /// <param name="services">The services.</param>
         public CollectorCommand(
             ILogger<CollectorCommand> logger,
-            FileSystem fileSystem,
-            HeliosEnvironment environment)
+            HeliosEnvironment environment,
+            IServiceProvider services)
         {
             this.logger = logger;
-            this.fileSystem = fileSystem;
             this.environment = environment;
+            this.services = services;
         }
 
         /// <inheritdoc />
@@ -72,27 +72,27 @@ namespace Rimrock.Helios.Collector
                 ClrEvents = Array.Empty<string>(),
             };
 
-            Console.WriteLine(JsonSerializer.Serialize(configuration, new JsonSerializerOptions() { WriteIndented = true }));
-
             if (!configuration.TryValidate(out var errors))
             {
                 foreach (string? validationError in errors)
                 {
-                    this.logger.LogError(validationError);
+                    this.logger.LogError("Validation error: {error}", validationError);
                 }
 
-                throw new CommandLineConfigurationException("Invalid arguments specified.");
+                this.logger.LogError("Specified configuration, {config}", JsonSerializer.Serialize(configuration, new JsonSerializerOptions() { WriteIndented = true }));
+
+                throw new CommandLineConfigurationException("Invalid configuration specified.");
             }
 
-            using PerfViewAgent agent = PerfViewAgent.Start(configuration);
-            //agent.Wait();
+            var agent = (PerfViewAgent)ActivatorUtilities.CreateInstance<PerfViewAgent>(this.services);
+            this.logger.LogInformation("Started collection agent...");
+            agent.Run(configuration);
 
             this.Analyze(context);
         }
 
         private void Analyze(InvocationContext context)
         {
-
         }
     }
 }

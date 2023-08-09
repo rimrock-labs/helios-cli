@@ -30,12 +30,26 @@ namespace Rimrock.Helios.Cli
                 return;
             }
 
+            if (logEntry.LogLevel == LogLevel.Error)
+            {
+                // red
+                textWriter.Write("\x1b[1;31m");
+            }
+            else if (logEntry.LogLevel == LogLevel.Warning)
+            {
+                // yellow
+                textWriter.Write("\x1b[1;33m");
+            }
+
             textWriter.Write('[');
             textWriter.Write(DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ssZ"));
             textWriter.Write("] ");
             textWriter.Write(logEntry.Category);
             textWriter.Write(": ");
             textWriter.WriteLine(message);
+
+            // clear formatting
+            textWriter.Write("\x1b[0m");
         }
 
         public class Options : ConsoleFormatterOptions

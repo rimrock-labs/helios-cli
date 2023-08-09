@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/cli/bin/Debug/net7.0/helios-cli.dll",
             "args": [
-                "--verbose --help"
+                "@test-collect.rsp"
             ],
             "cwd": "${workspaceFolder}/cli",
             "console": "internalConsole",

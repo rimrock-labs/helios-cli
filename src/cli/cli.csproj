@@ -6,6 +6,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>helios-cli</AssemblyName>
     <RootNamespace>Rimrock.Helios.Cli</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

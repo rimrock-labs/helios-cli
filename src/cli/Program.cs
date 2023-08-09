@@ -50,7 +50,6 @@
                         logging.ClearProviders();
                         logging.AddFilter("*", LogLevel.None);
                         logging.AddFilter("Rimrock", verbose ? LogLevel.Trace : LogLevel.Warning);
-                        //logging.AddSimpleConsole(ConfigureConsole);
                         logging.AddConsole(_ => _.FormatterName = nameof(CustomConsoleFormatter));
                         logging.AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatter.Options>();
                     })
@@ -75,7 +74,7 @@
                 }
                 catch (FileNotFoundException)
                 {
-                    // silently skip things we cannot load?
+                    logger.LogWarning("Unable to locate the '{assembly}' assembly.", commandAssembly);
                 }
 
                 if (assembly != null)
@@ -95,12 +94,6 @@
                 .UseDefaults()
                 .Build()
                 .InvokeAsync(args);
-        }
-
-        private static void ConfigureConsole(SimpleConsoleFormatterOptions console)
-        {
-            console.IncludeScopes = false;
-            console.TimestampFormat = "yyyy-MM-dd hh:mm:ssZ ";
         }
 
         private static void AddCommands(RootCommand rootCommand, IReadOnlyCollection<Command> subCommands)
