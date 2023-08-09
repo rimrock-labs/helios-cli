@@ -16,14 +16,6 @@ namespace Rimrock.Helios.Analysis.Views
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvView"/> class.
         /// </summary>
-        public CsvView()
-            : this(FileSystem.Instance)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CsvView"/> class.
-        /// </summary>
         /// <param name="fileSystem">The file system.</param>
         public CsvView(FileSystem fileSystem)
         {

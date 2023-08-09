@@ -9,8 +9,10 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/cli/bin/Debug/net6.0/Karpus.AppSpy.Cli.dll",
-            "args": ["--verbose"],
+            "program": "${workspaceFolder}/cli/bin/Debug/net7.0/helios-cli.dll",
+            "args": [
+                "--verbose --help"
+            ],
             "cwd": "${workspaceFolder}/cli",
             "console": "internalConsole",
             "stopAtEntry": false

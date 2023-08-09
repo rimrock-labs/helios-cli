@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <Microsoft_Extensions_Hosting>7.0.1</Microsoft_Extensions_Hosting>
+    <Microsoft_Extensions_Loggin>7.0.0</Microsoft_Extensions_Loggin>
     <System_CommandLine>2.0.0-beta4.22272.1</System_CommandLine>
   </PropertyGroup>
 

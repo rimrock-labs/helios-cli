@@ -9,14 +9,9 @@ namespace Rimrock.Helios.Common
     public class HeliosEnvironment
     {
         /// <summary>
-        /// The instance.
-        /// </summary>
-        public static readonly HeliosEnvironment Instance = new();
-
-        /// <summary>
         /// Gets the application directory.
         /// </summary>
-        public string ApplicationDirectory { get; } = GetApplicationDirectory();
+        public virtual string ApplicationDirectory { get; } = GetApplicationDirectory();
 
         private static string GetApplicationDirectory() =>
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;

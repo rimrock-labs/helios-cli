@@ -15,18 +15,20 @@ namespace Rimrock.Helios.Common
         public StringMacros(DefaultValues? defaults = null)
             : base()
         {
-            defaults ??= new DefaultValues();
-            DateTimeOffset dateTime = defaults.TimeStamp;
-            this["date:year"] = dateTime.ToString("yyyy");
-            this["date:month"] = dateTime.ToString("MM");
-            this["date:day"] = dateTime.ToString("dd");
-            this["time:hours"] = dateTime.ToString("HH");
-            this["time:minutes"] = dateTime.ToString("mm");
-            this["time:seconds"] = dateTime.ToString("ss");
+            if (defaults != null)
+            {
+                DateTimeOffset dateTime = defaults.TimeStamp;
+                this["date:year"] = dateTime.ToString("yyyy");
+                this["date:month"] = dateTime.ToString("MM");
+                this["date:day"] = dateTime.ToString("dd");
+                this["time:hours"] = dateTime.ToString("HH");
+                this["time:minutes"] = dateTime.ToString("mm");
+                this["time:seconds"] = dateTime.ToString("ss");
 
-            this["guid"] = defaults.Guid.ToString();
+                this["guid"] = defaults.Guid.ToString();
 
-            this["pwd"] = defaults.ApplicationDirectory;
+                this["pwd"] = defaults.ApplicationDirectory;
+            }
         }
 
         /// <summary>
@@ -64,9 +66,18 @@ namespace Rimrock.Helios.Common
         public class DefaultValues
         {
             /// <summary>
+            /// Initializes a new instance of the <see cref="DefaultValues"/> class.
+            /// </summary>
+            /// <param name="environment">The environment.</param>
+            public DefaultValues(HeliosEnvironment environment)
+            {
+                this.ApplicationDirectory = environment.ApplicationDirectory;
+            }
+
+            /// <summary>
             /// Gets or sets the application directory.
             /// </summary>
-            public string ApplicationDirectory { get; set; } = HeliosEnvironment.Instance.ApplicationDirectory;
+            public string ApplicationDirectory { get; set; }
 
             /// <summary>
             /// Gets or sets the time stamp.

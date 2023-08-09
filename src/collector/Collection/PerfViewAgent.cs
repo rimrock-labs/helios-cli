@@ -5,6 +5,7 @@ namespace Rimrock.Helios.Collection
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Text;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Common;
@@ -25,21 +26,8 @@ namespace Rimrock.Helios.Collection
             this.configuration = configuration;
         }
 
-        public static PerfViewAgent Start(ILogger logger, FileSystem fileSystem, Configuration configuration)
+        public static PerfViewAgent Start(Configuration configuration)
         {
-            List<ValidationResult> validationResults = new();
-            if (!Validator.TryValidateObject(configuration, new ValidationContext(configuration), validationResults, true))
-            {
-                StringBuilder resultBuilder = new();
-                foreach (ValidationResult result in validationResults)
-                {
-                    resultBuilder.AppendLine(result.ErrorMessage);
-                }
-
-                logger.LogError("Unable to validate the configuration properties,{NewLine}{Results}", Environment.NewLine, resultBuilder.ToString());
-                throw new ApplicationException("Unable to validate configuration properties.");
-            }
-
             // Process? process = Process.Start(new ProcessStartInfo(configuration.PerfViewPath)
             // {
             //     Arguments = $"Collect {configuration.OutputName} /LogFile:{configuration.OutputName}.log /MaxCollectSec:{configuration.Duration.TotalSeconds} /Circular:{configuration.MaxOutputSize} /BufferSize:{configuration.Buffer} /CpuSampleMSec:${configuration.CpuSamplingRate} /RundownTimeout:${configuration.RundownTimeout} /NoNGenRundown /Merge:false /Zip:false /TrustPdbs /AcceptEULA /SafeMode /EnableEventsInContainers /KernelEvents={string.Join(',', configuration.KernelEvents)} /ClrEvents={string.Join(',', configuration.ClrEvents)}",
@@ -114,6 +102,27 @@ namespace Rimrock.Helios.Collection
             public required string[] KernelEvents { get; init; }
 
             public TimeSpan Timeout { get; set; } = TimeSpan.FromMinutes(5);
+
+            public bool TryValidate([NotNullWhen(false)] out IReadOnlyList<string?>? errors)
+            {
+                bool result = true;
+                errors = default;
+
+                List<ValidationResult> validationResults = new();
+                if (!Validator.TryValidateObject(this, new ValidationContext(this), validationResults, true))
+                {
+                    List<string?> errorMessages = new(validationResults.Count);
+                    foreach (ValidationResult validation in validationResults)
+                    {
+                        errorMessages.Add(validation.ErrorMessage);
+                    }
+
+                    errors = errorMessages;
+                    result = false;
+                }
+
+                return result;
+            }
         }
     }
 }

@@ -6,13 +6,18 @@
     using System.CommandLine.Builder;
     using System.CommandLine.Parsing;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Rimrock.Helios.Cli.Configuration;
-    using Rimrock.Helios.Common.Commands;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
+    using Microsoft.Extensions.Options;
+    using Rimrock.Helios.Cli.Configuration;
+    using Rimrock.Helios.Common;
+    using Rimrock.Helios.Common.Commands;
 
     /// <summary>
     /// Program class.
@@ -24,42 +29,53 @@
         /// </summary>
         /// <param name="args">The arguments.</param>
         /// <returns>A completion task.</returns>
-        public static async Task<int> Main(string[] args)
+        public static Task<int> Main(string[] args)
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .AddJsonFile("helios-cli.json", optional: false)
-                .AddJsonFile($"helios-cli.{Environment.MachineName}.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            Options options = new();
-            configuration.Bind(options);
-
             Option<bool> verboseOptions = new("--verbose", "Enable verbose logging.");
             RootCommand command = new("Command line interface for performance analysis.");
             command.AddGlobalOption(verboseOptions);
 
-            bool verbose = new Parser(command).Parse(args).GetValueForOption(verboseOptions);
-            ILoggerFactory loggerFactory = LoggerFactory.Create(_ =>
-            {
-                _.AddFilter("App", verbose ? LogLevel.Trace : LogLevel.Warning);
-                _.AddFilter("Command", verbose ? LogLevel.Trace : LogLevel.Warning);
-                _.AddSimpleConsole(ConfigureConsole);
-            });
+            bool verbose = args.Any(_ => _.Contains(verboseOptions.Name, StringComparison.OrdinalIgnoreCase));
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(
+                    config =>
+                    {
+                        config.AddJsonFile("helios-cli.json", optional: false);
+                        config.AddJsonFile($"helios-cli.{Environment.MachineName}.json", optional: true);
+                        config.AddEnvironmentVariables();
+                    })
+                .ConfigureLogging(
+                    logging =>
+                    {
+                        logging.ClearProviders();
+                        logging.AddFilter("*", LogLevel.None);
+                        logging.AddFilter("Rimrock", verbose ? LogLevel.Trace : LogLevel.Warning);
+                        //logging.AddSimpleConsole(ConfigureConsole);
+                        logging.AddConsole(_ => _.FormatterName = nameof(CustomConsoleFormatter));
+                        logging.AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatter.Options>();
+                    })
+                .ConfigureServices(
+                    services =>
+                    {
+                        services.AddSingleton<FileSystem>();
+                        services.AddSingleton<HeliosEnvironment>();
+                        services.AddOptions<AppSettings>().BindConfiguration(string.Empty).ValidateDataAnnotations();
+                    })
+                .Build();
 
-            ILogger logger = loggerFactory.CreateLogger("App");
-
-            foreach (string commandAssembly in options.Commands)
+            ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
+            IOptions<AppSettings> options = host.Services.GetRequiredService<IOptions<AppSettings>>();
+            AppSettings settings = options.Value;
+            foreach (string commandAssembly in settings.Commands)
             {
                 Assembly? assembly = null;
                 try
                 {
                     assembly = Assembly.Load(commandAssembly);
-                    logger.LogInformation("Loaded '{name}' command assembly.", commandAssembly);
                 }
                 catch (FileNotFoundException)
                 {
-                    logger.LogError("Unable to load the '{name}' command assembly.", commandAssembly);
+                    // silently skip things we cannot load?
                 }
 
                 if (assembly != null)
@@ -68,27 +84,17 @@
                     {
                         if (type.IsAssignableTo(typeof(ICommand)))
                         {
-                            ILogger commandLogger = loggerFactory.CreateLogger("Command");
-                            ICommand childCommand = (ICommand)Activator.CreateInstance(type, commandLogger)!;
-                            logger.LogInformation("Enabled '{command}' command.", childCommand.Name);
-
-                            AddCommands(command, childCommand.GetCommand());
+                            ICommand childCommand = (ICommand)ActivatorUtilities.CreateInstance(host.Services, type);
+                            AddCommands(command, childCommand.GetCommand(host.Services));
                         }
                     }
                 }
             }
 
-            CommandLineBuilder commandLineBuilder = new(command);
-            commandLineBuilder.UseDefaults();
-            Parser parser = commandLineBuilder.Build();
-            return await parser.InvokeAsync(args);
-
-            // Future commands,
-            // collect
-            // analyze
-            // monitor
-            // view
-            // upload
+            return new CommandLineBuilder(command)
+                .UseDefaults()
+                .Build()
+                .InvokeAsync(args);
         }
 
         private static void ConfigureConsole(SimpleConsoleFormatterOptions console)

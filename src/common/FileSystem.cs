@@ -1,6 +1,5 @@
 namespace Rimrock.Helios.Common
 {
-    using System;
     using System.IO;
 
     /// <summary>
@@ -8,11 +7,6 @@ namespace Rimrock.Helios.Common
     /// </summary>
     public class FileSystem
     {
-        /// <summary>
-        /// The instance.
-        /// </summary>
-        public static readonly FileSystem Instance = new();
-
         /// <summary>
         /// <see cref="System.IO.File.Exists(string?)"/> wrapper.
         /// </summary>
