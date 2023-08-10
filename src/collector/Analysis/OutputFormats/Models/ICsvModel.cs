@@ -1,11 +1,11 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System.Collections.Generic;
 
     /// <summary>
     /// CSV model class.
     /// </summary>
-    public interface ICsvModel : IModel
+    public interface ICsvModel : IDataModel
     {
         /// <summary>
         /// Gets the column names.

@@ -4,7 +4,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using Microsoft.Diagnostics.Tracing.Etlx;
     using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
     using Microsoft.Extensions.Logging;
-    using Rimrock.Helios.Analysis.Views;
+    using Rimrock.Helios.Analysis.OutputFormats;
 
     [DataAnalyzer(Name = "CPU")]
     [WindowsProfilingDefinition(
@@ -12,7 +12,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         KernelEvents = new[] { "Process", "Profile", "ImageLoad" })]
     internal class CpuDataAnalyzer : BaseDataAnalyzer
     {
-        public CpuDataAnalyzer(ILogger logger)
+        public CpuDataAnalyzer(ILogger<CpuDataAnalyzer> logger)
             : base(logger)
         {
         }

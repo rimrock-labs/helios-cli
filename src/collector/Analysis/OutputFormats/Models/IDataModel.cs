@@ -1,9 +1,9 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     /// <summary>
     /// Model interface.
     /// </summary>
-    public interface IModel
+    public interface IDataModel
     {
         /// <summary>
         /// Adds data.

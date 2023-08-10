@@ -1,4 +1,4 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System;
     using System.Collections.Generic;

@@ -6,15 +6,15 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using System.Reflection;
     using Microsoft.Diagnostics.Tracing;
     using Microsoft.Extensions.Logging;
-    using Rimrock.Helios.Analysis.Views;
+    using Rimrock.Helios.Analysis.OutputFormats;
 
     /// <summary>
     /// Base data analyzer class.
     /// </summary>
     public abstract class BaseDataAnalyzer : IDataAnalyzer
     {
-        private readonly Dictionary<Type, IModel> models;
-        private readonly List<IView> views;
+        private readonly Dictionary<Type, IDataModel> models;
+        private readonly List<IOutputFormat> views;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseDataAnalyzer"/> class.
@@ -24,8 +24,8 @@ namespace Rimrock.Helios.Analysis.Analyzers
         {
             this.Logger = logger;
 
-            this.models = new Dictionary<Type, IModel>();
-            this.views = new List<IView>();
+            this.models = new Dictionary<Type, IDataModel>();
+            this.views = new List<IOutputFormat>();
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// <inheritdoc />
         public virtual void OnStart(AnalysisContext context)
         {
-            this.InitializeViews(context.Views);
+            this.InitializeViews(context.OutputFormats);
         }
 
         /// <inheritdoc />
@@ -50,9 +50,9 @@ namespace Rimrock.Helios.Analysis.Analyzers
                 AnalyzerName = this.GetAnalyzerName(),
             };
 
-            foreach (IView view in this.views)
+            foreach (IOutputFormat view in this.views)
             {
-                if (this.models.TryGetValue(view.ModelType, out IModel? model))
+                if (this.models.TryGetValue(view.ModelType, out IDataModel? model))
                 {
                     view.Save(analyzerContext, context, model);
                 }
@@ -65,7 +65,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// <param name="data">The data.</param>
         protected void AddData(IData data)
         {
-            foreach (IModel model in this.models.Values)
+            foreach (IDataModel model in this.models.Values)
             {
                 model.AddData(data);
             }
@@ -76,7 +76,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
             HashSet<Type> modelTypes = new();
             foreach (Type viewType in views)
             {
-                IView view = (IView)Activator.CreateInstance(viewType)!;
+                IOutputFormat view = (IOutputFormat)Activator.CreateInstance(viewType)!;
                 Type modelType = view.ModelType;
                 modelTypes.Add(modelType);
 
@@ -85,7 +85,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
 
             foreach (Type modelType in modelTypes)
             {
-                IModel model = (IModel)Activator.CreateInstance(modelType)!;
+                IDataModel model = (IDataModel)Activator.CreateInstance(modelType)!;
                 this.models[modelType] = model;
             }
         }

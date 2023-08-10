@@ -1,4 +1,4 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System;
     using Rimrock.Helios.Analysis.Analyzers;
@@ -6,7 +6,7 @@ namespace Rimrock.Helios.Analysis.Views
     /// <summary>
     /// View interface.
     /// </summary>
-    public interface IView
+    public interface IOutputFormat
     {
         /// <summary>
         /// Gets the model type.
@@ -19,6 +19,6 @@ namespace Rimrock.Helios.Analysis.Views
         /// <param name="analyzer">The analyzer context.</param>
         /// <param name="context">The context.</param>
         /// <param name="model">The model.</param>
-        void Save(AnalyzerContext analyzer, AnalysisContext context, IModel model);
+        void Save(AnalyzerContext analyzer, AnalysisContext context, IDataModel model);
     }
 }

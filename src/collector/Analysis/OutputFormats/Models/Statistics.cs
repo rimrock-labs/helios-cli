@@ -1,4 +1,4 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     /// <summary>
     /// Statistics class.

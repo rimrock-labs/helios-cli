@@ -1,4 +1,4 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace Rimrock.Helios.Analysis.Views
     /// <summary>
     /// Call stack model class.
     /// </summary>
-    public sealed class CallStackModel : IModel, ICsvModel
+    public sealed class CallStackModel : IDataModel, ICsvModel
     {
         private readonly ILogger logger;
         private readonly Dictionary<CallStackData, Statistics> data;

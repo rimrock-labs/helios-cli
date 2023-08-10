@@ -25,13 +25,13 @@ namespace Rimrock.Helios.Analysis
         public required SymbolStore Symbols { get; init; }
 
         /// <summary>
-        /// Gets or sets the enabled analyzers.
+        /// Gets the enabled analyzers.
         /// </summary>
-        public IReadOnlyList<IDataAnalyzer> Analyzers { get; set; } = Array.Empty<IDataAnalyzer>();
+        public List<IDataAnalyzer> Analyzers { get; } = new();
 
         /// <summary>
-        /// Gets the views.
+        /// Gets the output format types.
         /// </summary>
-        public required IReadOnlySet<Type> Views { get; init; }
+        public required IReadOnlySet<Type> OutputFormats { get; init; }
     }
 }

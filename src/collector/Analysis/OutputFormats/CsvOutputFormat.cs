@@ -1,4 +1,4 @@
-namespace Rimrock.Helios.Analysis.Views
+namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System;
     using System.Collections.Generic;
@@ -7,17 +7,18 @@ namespace Rimrock.Helios.Analysis.Views
     using Rimrock.Helios.Common;
 
     /// <summary>
-    /// CSV view base class.
+    /// CSV output format class.
     /// </summary>
-    public class CsvView : IView
+    [OutputFormat(Name = "CSV")]
+    public class CsvOutputFormat : IOutputFormat
     {
         private readonly FileSystem fileSystem;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CsvView"/> class.
+        /// Initializes a new instance of the <see cref="CsvOutputFormat"/> class.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
-        public CsvView(FileSystem fileSystem)
+        public CsvOutputFormat(FileSystem fileSystem)
         {
             this.fileSystem = fileSystem;
         }
@@ -26,7 +27,7 @@ namespace Rimrock.Helios.Analysis.Views
         public Type ModelType => typeof(ICsvModel);
 
         /// <inheritdoc />
-        public void Save(AnalyzerContext analyzer, AnalysisContext context, IModel model) =>
+        public void Save(AnalyzerContext analyzer, AnalysisContext context, IDataModel model) =>
             this.Save(analyzer, context, (ICsvModel)model);
 
         private void Save(AnalyzerContext analyzer, AnalysisContext context, ICsvModel model)
