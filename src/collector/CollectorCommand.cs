@@ -75,17 +75,28 @@ namespace Rimrock.Helios.Collector
 
         private void Collect(InvocationContext context)
         {
+            string workingDirectory = this.GetOutputDirectory(context);
+            this.fileSystem.CreateDirectory(workingDirectory);
+            this.logger.LogInformation("Set working directory, {dir}", workingDirectory);
+
             string? tracePath = context.ParseResult.GetValueForOption(TracePathOption);
             if (tracePath == null || !this.fileSystem.FileExists(tracePath))
             {
+                HashSet<Type> analyzerTypes = new(DataAnalyzerAttribute.GetAnalyzersByName(context.ParseResult.GetValueForOption(DataAnalyzerOption)));
+
+                HashSet<string> kernelEvents = new(StringComparer.OrdinalIgnoreCase) { "Process", "ImageLoad" };
+                HashSet<string> clrEvents = new(StringComparer.OrdinalIgnoreCase) { "Loader" };
+                kernelEvents.AddRange(WindowsProfilingDefinitionAttribute.GetKernelEvents(analyzerTypes));
+                clrEvents.AddRange(WindowsProfilingDefinitionAttribute.GetClrEvents(analyzerTypes));
+
                 PerfViewAgent.Configuration configuration = new()
                 {
                     PerfViewPath = Path.Combine(this.environment.ApplicationDirectory, "PerfView", "PerfView.exe"),
-                    WorkingDirectory = this.GetOutputDirectory(context),
+                    WorkingDirectory = workingDirectory,
                     OutputName = $"Helios-{Environment.MachineName}-{DateTimeOffset.UtcNow:yyyyMMdd-hhmmss}",
                     Duration = context.ParseResult.GetValueForOption(DurationOption),
-                    KernelEvents = Array.Empty<string>(),
-                    ClrEvents = Array.Empty<string>(),
+                    KernelEvents = kernelEvents.ToArray(),
+                    ClrEvents = clrEvents.ToArray(),
                 };
 
                 if (!configuration.TryValidate(out var errors))
@@ -110,12 +121,11 @@ namespace Rimrock.Helios.Collector
                 this.logger.LogInformation("Skipping collection, path to existing trace was specified.");
             }
 
-            this.Analyze(context, tracePath);
+            this.Analyze(context, workingDirectory, tracePath);
         }
 
-        private void Analyze(InvocationContext context, string tracePath)
+        private void Analyze(InvocationContext context, string workingDirectory, string tracePath)
         {
-            HeliosTraceLog traceLog = new();
             string symbolPath = $";SRV*https://msdl.microsoft.com/download/symbols;SRV*https://nuget.smbsrc.net;SRV*https://referencesource.microsoft.com/symbols";
             string? symbolStoreCache = context.ParseResult.GetValueForOption(SymbolStoreCacheOption);
             if (!string.IsNullOrEmpty(symbolStoreCache))
@@ -126,8 +136,8 @@ namespace Rimrock.Helios.Collector
             AnalysisContext analysisContext = new()
             {
                 TracePath = tracePath,
-                WorkingDirectory = this.GetOutputDirectory(context),
-                Symbols = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, tracePath + ".log", symbolPath),
+                WorkingDirectory = workingDirectory,
+                Symbols = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, Path.Combine(workingDirectory, "symbol-resolution.log"), symbolPath),
                 OutputFormats = new HashSet<Type>(OutputFormatAttribute.GetViewsByName(context.ParseResult.GetValueForOption(OutputFormatOption))),
             };
 
@@ -151,6 +161,14 @@ namespace Rimrock.Helios.Collector
                 analyzer.OnStart(analysisContext);
             }
 
+            HeliosTraceLog traceLog = new();
+            traceLog.Open(tracePath);
+
+            this.logger.LogInformation("Opened trace, {trace}", tracePath);
+
+            long eventCount = 0;
+            long processedEventCount = 0;
+
             // OnData
             foreach (TraceEvent data in traceLog.Events)
             {
@@ -159,10 +177,17 @@ namespace Rimrock.Helios.Collector
                     for (int i = 0; i < analysisContext.Analyzers.Count; i++)
                     {
                         IDataAnalyzer analyzer = analysisContext.Analyzers[i];
-                        analyzer.OnData(analysisContext, data);
+                        if (analyzer.OnData(analysisContext, data))
+                        {
+                            processedEventCount++;
+                        }
+
+                        eventCount++;
                     }
                 }
             }
+
+            this.logger.LogInformation("Iterated through {count1} events, processed {count2} events.", eventCount, processedEventCount);
 
             // OnEnd
             for (int i = 0; i < analysisContext.Analyzers.Count; i++)

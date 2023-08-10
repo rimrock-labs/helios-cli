@@ -11,14 +11,14 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     /// </summary>
     public sealed class CallStackModel : IDataModel, ICsvModel
     {
-        private readonly ILogger logger;
+        private readonly ILogger<CallStackModel> logger;
         private readonly Dictionary<CallStackData, Statistics> data;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CallStackModel"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        public CallStackModel(ILogger logger)
+        public CallStackModel(ILogger<CallStackModel> logger)
         {
             this.logger = logger;
             this.data = new Dictionary<CallStackData, Statistics>(DataComparer.Instance);

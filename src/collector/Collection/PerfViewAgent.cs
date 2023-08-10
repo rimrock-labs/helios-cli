@@ -24,7 +24,6 @@ namespace Rimrock.Helios.Collection
 
         public void Run(Configuration configuration)
         {
-            this.fileSystem.CreateDirectory(configuration.WorkingDirectory);
             using Process? process = Process.Start(new ProcessStartInfo(configuration.PerfViewPath)
             {
                 Arguments = $"Collect {configuration.OutputName} /LogFile:{configuration.OutputName}.log /MaxCollectSec:{configuration.Duration.TotalSeconds} /Circular:{configuration.MaxOutputSize} /BufferSize:{configuration.Buffer} /CpuSampleMSec:{configuration.CpuSamplingRate} /RundownTimeout:{configuration.RundownTimeout} /RundownMaxMB:{configuration.MaxRundownOutputSize} /NoNGenRundown /Merge:false /Zip:false /TrustPdbs /AcceptEULA /SafeMode /EnableEventsInContainers /KernelEvents={string.Join(',', configuration.KernelEvents)} /ClrEvents={string.Join(',', configuration.ClrEvents)}",

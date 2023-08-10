@@ -35,7 +35,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         {
             if (InternalAnalyzers.Count == 0)
             {
-                IEnumerable<Type> analyzerTypes = Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsAssignableFrom(typeof(IDataAnalyzer)) && !_.IsAbstract);
+                IEnumerable<Type> analyzerTypes = Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsAssignableTo(typeof(IDataAnalyzer)) && !_.IsAbstract);
                 foreach (Type analyzerType in analyzerTypes)
                 {
                     DataAnalyzerAttribute? attribute = analyzerType.GetCustomAttribute<DataAnalyzerAttribute>();

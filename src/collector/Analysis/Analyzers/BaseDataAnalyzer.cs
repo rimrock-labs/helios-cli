@@ -5,6 +5,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using System.Linq;
     using System.Reflection;
     using Microsoft.Diagnostics.Tracing;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Analysis.OutputFormats;
 
@@ -20,9 +21,11 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// Initializes a new instance of the <see cref="BaseDataAnalyzer"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        public BaseDataAnalyzer(ILogger logger)
+        /// <param name="services">The services.</param>
+        public BaseDataAnalyzer(ILogger logger, IServiceProvider services)
         {
             this.Logger = logger;
+            this.Services = services;
 
             this.models = new Dictionary<Type, IDataModel>();
             this.views = new List<IOutputFormat>();
@@ -33,6 +36,11 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// </summary>
         protected ILogger Logger { get; }
 
+        /// <summary>
+        /// Gets the services.
+        /// </summary>
+        protected IServiceProvider Services { get; }
+
         /// <inheritdoc />
         public virtual void OnStart(AnalysisContext context)
         {
@@ -40,7 +48,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         }
 
         /// <inheritdoc />
-        public abstract void OnData(AnalysisContext context, TraceEvent data);
+        public abstract bool OnData(AnalysisContext context, TraceEvent data);
 
         /// <inheritdoc />
         public virtual void OnEnd(AnalysisContext context)
@@ -76,7 +84,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
             HashSet<Type> modelTypes = new();
             foreach (Type viewType in views)
             {
-                IOutputFormat view = (IOutputFormat)Activator.CreateInstance(viewType)!;
+                IOutputFormat view = (IOutputFormat)ActivatorUtilities.CreateInstance(this.Services, viewType)!;
                 Type modelType = view.ModelType;
                 modelTypes.Add(modelType);
 
@@ -85,7 +93,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
 
             foreach (Type modelType in modelTypes)
             {
-                IDataModel model = (IDataModel)Activator.CreateInstance(modelType)!;
+                IDataModel model = (IDataModel)ActivatorUtilities.CreateInstance(this.Services, modelType)!;
                 this.models[modelType] = model;
             }
         }

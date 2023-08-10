@@ -35,7 +35,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         {
             if (InternalViews.Count == 0)
             {
-                IEnumerable<Type> viewTypes = Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsAssignableFrom(typeof(IOutputFormat)) && !_.IsAbstract);
+                IEnumerable<Type> viewTypes = Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsAssignableTo(typeof(IOutputFormat)) && !_.IsAbstract);
                 foreach (Type viewType in viewTypes)
                 {
                     OutputFormatAttribute? attribute = viewType.GetCustomAttribute<OutputFormatAttribute>();
