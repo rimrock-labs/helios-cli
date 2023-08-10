@@ -23,13 +23,14 @@ namespace Rimrock.Helios.Collector
     /// </summary>
     public class CollectorCommand : ICommand
     {
-        private static readonly Option<string> OutputDirectoryOption = new("--output-directory", description: "Output directory.") { IsRequired = true };
+        private static readonly Option<string> OutputDirectoryOption = new("--output-directory", "Output directory.") { IsRequired = true };
         private static readonly Option<TimeSpan> DurationOption = new("--duration", description: "Duration of collection.", getDefaultValue: () => TimeSpan.FromMinutes(1));
-        private static readonly Option<string> SymbolStoreCacheOption = new("--symbol-store-cache", description: "Path to directory where symbols are cached.");
+        private static readonly Option<string> SymbolStoreCacheOption = new("--symbol-store-cache", "Path to directory where symbols are cached.");
         private static readonly Option<string[]> OutputFormatOption = new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { OutputFormatAttribute.GetName(typeof(CsvOutputFormat)) }).FromAmong(OutputFormatAttribute.GetViews().Keys.ToArray());
         private static readonly Option<string[]> DataAnalyzerOption = new Option<string[]>("--data-analyzer", description: "Data sets to collect.", getDefaultValue: () => new[] { DataAnalyzerAttribute.GetName(typeof(CpuDataAnalyzer)) }).FromAmong(DataAnalyzerAttribute.GetAnalyzers().Keys.ToArray());
-        private static readonly Option<int[]> ProcessIdOption = new("--process-id", description: "Process identifiers to focus the data to.");
-        private static readonly Option<string> TracePathOption = new("--trace-path", description: "Path to existing trace.");
+        private static readonly Option<int[]> ProcessIdOption = new("--process-id", "Process identifiers to focus the data to.");
+        private static readonly Option<string> TracePathOption = new("--trace-path", "Path to existing trace.");
+        private static readonly Option<bool> ResolveNativeSymbolsOption = new("--resolve-native-symbols", "Resolve native symbols.");
 
         private readonly ILogger<CollectorCommand> logger;
         private readonly HeliosEnvironment environment;
@@ -69,6 +70,7 @@ namespace Rimrock.Helios.Collector
             command.AddOption(DurationOption);
             command.AddOption(SymbolStoreCacheOption);
             command.AddOption(TracePathOption);
+            command.AddOption(ResolveNativeSymbolsOption);
             command.SetHandler(this.Collect);
             return new[] { command };
         }
@@ -133,19 +135,22 @@ namespace Rimrock.Helios.Collector
                 symbolPath = symbolPath.Replace("*", $"*{symbolStoreCache}*");
             }
 
+            SymbolStore symbolStore = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, Path.Combine(workingDirectory, "symbol-resolution.log"), symbolPath);
+            symbolStore.ResolveNativeSymbols = context.ParseResult.GetValueForOption(ResolveNativeSymbolsOption);
             AnalysisContext analysisContext = new()
             {
                 TracePath = tracePath,
                 WorkingDirectory = workingDirectory,
-                Symbols = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, Path.Combine(workingDirectory, "symbol-resolution.log"), symbolPath),
+                Symbols = symbolStore,
                 OutputFormats = new HashSet<Type>(OutputFormatAttribute.GetViewsByName(context.ParseResult.GetValueForOption(OutputFormatOption))),
             };
 
             HashSet<Type> analyzerTypes = new(DataAnalyzerAttribute.GetAnalyzersByName(context.ParseResult.GetValueForOption(DataAnalyzerOption)));
             foreach (Type analyzerType in analyzerTypes)
             {
-                var analyzer = (IDataAnalyzer)ActivatorUtilities.CreateInstance(this.services, analyzerType);
+                IDataAnalyzer analyzer = (IDataAnalyzer)ActivatorUtilities.CreateInstance(this.services, analyzerType);
                 analysisContext.Analyzers.Add(analyzer);
+                this.logger.LogInformation("Constructed {analyzer} analyzer.", analyzerType.Name);
             }
 
             this.logger.LogInformation("Created {number} analyzers.", analysisContext.Analyzers.Count);

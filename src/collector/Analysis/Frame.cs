@@ -74,6 +74,16 @@ namespace Rimrock.Helios.Analysis
                    string.Equals(this.MethodName, other.MethodName);
         }
 
+        /// <summary>
+        /// Checks whether the frame module name and method name match provided values.
+        /// </summary>
+        /// <param name="moduleName">The module name.</param>
+        /// <param name="methodName">The method name.</param>
+        /// <returns>true if equal, false otherwise.</returns>
+        public bool Equals(string moduleName, string methodName) =>
+            StringComparer.OrdinalIgnoreCase.Equals(this.ModuleName, moduleName) &&
+            string.Equals(this.MethodName, methodName);
+
         /// <inheritdoc />
         public override int GetHashCode() => this.hashCode;
     }

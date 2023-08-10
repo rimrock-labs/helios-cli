@@ -57,7 +57,13 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                 Frame? frame = data.Key.CallStack;
                 while (frame != null)
                 {
-                    builder.Append(frame.ModuleName).Append('!').Append(frame.MethodName).Append(';');
+                    builder.Append(frame.ModuleName);
+                    if (!string.IsNullOrEmpty(frame.MethodName))
+                    {
+                        builder.Append('!').Append(frame.MethodName);
+                    }
+
+                    builder.Append(';');
                     frame = frame.Caller;
                 }
 

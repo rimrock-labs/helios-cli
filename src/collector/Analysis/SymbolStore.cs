@@ -45,6 +45,11 @@ namespace Rimrock.Helios.Analysis
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether or not to resolve native symbols.
+        /// </summary>
+        public bool ResolveNativeSymbols { get; set; }
+
+        /// <summary>
         /// Tries to resolve the stack.
         /// </summary>
         /// <param name="inStack">The input stack.</param>
@@ -61,19 +66,28 @@ namespace Rimrock.Helios.Analysis
             {
                 while (inStack != null)
                 {
-                    this.ResolveCodeAddress(inStack.CodeAddress, out string moduleName, out string methodName);
+                    this.ResolveCodeAddress(inStack.CodeAddress, out string moduleName, out string methodName, out bool isNative);
 
-                    Frame frame = new(moduleName, methodName);
-                    if (previous == null)
+                    if (isNative && (moduleName == "?" || methodName == "?"))
                     {
-                        outStack = previous = frame;
-                        result = true;
+                        moduleName = "[Native Method]";
+                        methodName = string.Empty;
                     }
-                    else
+
+                    if (!previous?.Equals(moduleName, methodName) ?? true)
                     {
-                        previous.Caller = frame;
-                        frame.Callee = previous;
-                        previous = frame;
+                        Frame frame = new(moduleName, methodName);
+                        if (previous == null)
+                        {
+                            outStack = previous = frame;
+                            result = true;
+                        }
+                        else
+                        {
+                            previous.Caller = frame;
+                            frame.Callee = previous;
+                            previous = frame;
+                        }
                     }
 
                     inStack = inStack.Caller;
@@ -198,11 +212,13 @@ namespace Rimrock.Helios.Analysis
         private void ResolveCodeAddress(
             TraceCodeAddress codeAddress,
             out string moduleName,
-            out string methodName)
+            out string methodName,
+            out bool isNative)
         {
             this.OptimizeCodeAddress(codeAddress);
 
-            if (codeAddress.Method == null)
+            isNative = codeAddress.Method == null;
+            if (codeAddress.Method == null && this.ResolveNativeSymbols)
             {
                 TraceModuleFile moduleFile = codeAddress.ModuleFile;
                 if (moduleFile != null && !this.missingModuleSymbols.Contains(moduleFile.Name))
@@ -214,7 +230,7 @@ namespace Rimrock.Helios.Analysis
                     }
                     catch (Exception exception)
                     {
-                        this.logger.LogInformation("Symbol resolution failed for '{ModuleFileFilePath}', with exception:{NewLine}{Exception}", moduleFile.FilePath, Environment.NewLine, exception);
+                        this.logger.LogInformation(exception, "Symbol resolution failed for '{ModuleFileFilePath}'.", moduleFile.FilePath);
                     }
 
                     if (string.IsNullOrEmpty(codeAddress.FullMethodName))
