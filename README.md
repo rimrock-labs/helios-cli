@@ -7,15 +7,21 @@ This system will not only let teams understand what their dotnet applications ar
 
 We are just coming online so stay tuned!
 
-## ⚒️ Active Work Areas (as of 8/5/2023)
+## ⚒️ Active Work Areas (as of 8/11/2023)
 
 The below work is geared towards an **ALPHA** release.
 
-- [ ] cli - The main user interface. Work includes support for future extensibility for additional commands
-- [ ] collection/analysis - This is the bulk of the current effort. It includes adding ETW profiling support for CPU, as well as CSV output of the collected stacks.
-  - [ ] Data Analyzers - just CPU for now
-  - [ ] Output Mechanism - just CSV for now
-  - [ ] End-to-End plumbing
+- [x] cli - The main user interface. Work includes support for future extensibility for additional commands
+- [x] collection/analysis - This is the bulk of the current effort. It includes adding ETW profiling support for CPU, as well as CSV output of the collected stacks.
+  - [x] Data Analyzers - just CPU for now
+  - [x] Output Mechanism - just CSV for now
+  - [x] End-to-End plumbing (Host, DI, Configuration, Logging)
+  - [ ] Additional data streams (Memory allocations, Exceptions)
+  - [ ] Additional data format,
+    - [ ] PerfView XML
+    - [ ] Chromium (?)
+    - [ ] Speedscope (?)
+    - [ ] A binary (graph-like) data format
 
 ## 🛣️ Roadmap
 
@@ -28,7 +34,6 @@ The near future goals include,
 - [ ] Tests
 
 **v1.0**
-- [ ] Additional data streams (Memory allocations, Exceptions) (v1.0)
 - [ ] A binary (graph-like) data format (v1.0)
 - [ ] Monitoring functionality (v1.0)
   - [ ] Performance counter collection using PDH (Windows)
