@@ -24,10 +24,10 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         }
 
         /// <inheritdoc />
-        public Type ModelType => typeof(CallStackModel);
+        public virtual Type ModelType => typeof(StackModel);
 
         /// <inheritdoc />
-        public void Save(AnalyzerContext analyzer, AnalysisContext context, IDataModel model) =>
+        public virtual void Save(AnalyzerContext analyzer, AnalysisContext context, IDataModel model) =>
             this.Save(analyzer, context, (ICsvModel)model);
 
         private void Save(AnalyzerContext analyzer, AnalysisContext context, ICsvModel model)

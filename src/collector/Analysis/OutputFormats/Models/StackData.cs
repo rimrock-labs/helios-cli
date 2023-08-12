@@ -4,17 +4,17 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     using System.Collections.Generic;
 
     /// <summary>
-    /// Call stack data class.
+    /// Stack data class.
     /// </summary>
-    public class CallStackData : IData
+    public class StackData : IData
     {
         private readonly HashSet<string> tags;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CallStackData"/> class.
+        /// Initializes a new instance of the <see cref="StackData"/> class.
         /// </summary>
         /// <param name="callStack">The call stack.</param>
-        public CallStackData(Frame callStack)
+        public StackData(Frame callStack)
         {
             this.CallStack = callStack;
             this.tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

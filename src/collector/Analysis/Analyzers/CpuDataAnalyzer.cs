@@ -18,16 +18,16 @@ namespace Rimrock.Helios.Analysis.Analyzers
         {
         }
 
-        public override bool OnData(AnalysisContext context, TraceEvent traceEvent)
+        public override bool OnData(AnalysisContext context, Process process, TraceEvent traceEvent)
         {
             bool result = false;
             if (traceEvent is SampledProfileTraceData &&
                 context.Symbols.TryResolve(traceEvent.CallStack(), out Frame? frame))
             {
-                CallStackData data = new(frame);
+                StackData data = new(frame);
 
                 // TODO: add additional predefined tags
-                data.AddProcessTag(traceEvent.ProcessName);
+                data.AddProcessTag(process.Name);
 
                 this.AddData(data);
                 result = true;

@@ -7,33 +7,33 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     using Microsoft.Extensions.Logging;
 
     /// <summary>
-    /// Call stack model class.
+    /// Stack model class.
     /// </summary>
-    public sealed class CallStackModel : IDataModel, ICsvModel
+    public sealed class StackModel : IDataModel, ICsvModel
     {
-        private readonly ILogger<CallStackModel> logger;
-        private readonly Dictionary<CallStackData, Statistics> data;
+        private readonly ILogger<StackModel> logger;
+        private readonly Dictionary<StackData, Statistics> data;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CallStackModel"/> class.
+        /// Initializes a new instance of the <see cref="StackModel"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        public CallStackModel(ILogger<CallStackModel> logger)
+        public StackModel(ILogger<StackModel> logger)
         {
             this.logger = logger;
-            this.data = new Dictionary<CallStackData, Statistics>(DataComparer.Instance);
+            this.data = new Dictionary<StackData, Statistics>(DataComparer.Instance);
         }
 
         /// <summary>
         /// Gets the model data.
         /// </summary>
         /// <returns>The data.</returns>
-        public IEnumerable<KeyValuePair<CallStackData, Statistics>> GetData() => this.data;
+        public IEnumerable<KeyValuePair<StackData, Statistics>> GetData() => this.data;
 
         /// <inheritdoc />
         public void AddData(IData data)
         {
-            if (data is CallStackData callData)
+            if (data is StackData callData)
             {
                 this.AddData(callData);
             }
@@ -50,7 +50,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         public IEnumerable<IReadOnlyList<string>> GetDataRows()
         {
             List<string> row = new(4);
-            foreach (KeyValuePair<CallStackData, Statistics> data in this.data)
+            foreach (KeyValuePair<StackData, Statistics> data in this.data)
             {
                 row.Clear();
                 StringBuilder builder = new();
@@ -84,7 +84,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
         }
 
-        private void AddData(CallStackData data)
+        private void AddData(StackData data)
         {
             if (!this.data.TryGetValue(data, out Statistics? statistics))
             {
@@ -98,7 +98,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         /// <summary>
         /// Data comparer class.
         /// </summary>
-        public class DataComparer : EqualityComparer<CallStackData>
+        public class DataComparer : EqualityComparer<StackData>
         {
             /// <summary>
             /// The comparer instance.
@@ -113,7 +113,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
 
             /// <inheritdoc/>
-            public override bool Equals(CallStackData? x, CallStackData? y)
+            public override bool Equals(StackData? x, StackData? y)
             {
                 return (x == null && y == null) ||
                     (x != null && y != null &&
@@ -122,7 +122,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
 
             /// <inheritdoc/>
-            public override int GetHashCode(CallStackData obj)
+            public override int GetHashCode(StackData obj)
             {
                 return HashCode.Combine(
                     obj.CallStack.GetHashCode(),

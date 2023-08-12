@@ -62,7 +62,7 @@ namespace Rimrock.Helios.Collector
         /// <inheritdoc />
         public IReadOnlyList<Command> GetCommand()
         {
-            Command command = new(this.Name, description: "Collects data from the current machine.");
+            Command command = new(this.Name, description: "Collects and analyzes data from the current machine's running processes.");
             command.AddOption(OutputDirectoryOption);
             command.AddOption(DataAnalyzerOption);
             command.AddOption(ProcessIdOption);
@@ -166,8 +166,7 @@ namespace Rimrock.Helios.Collector
                 analyzer.OnStart(analysisContext);
             }
 
-            HeliosTraceLog traceLog = new();
-            traceLog.Open(tracePath);
+            HeliosTraceLog traceLog = new(tracePath);
 
             this.logger.LogInformation("Opened trace, {trace}", tracePath);
 
@@ -179,15 +178,18 @@ namespace Rimrock.Helios.Collector
             {
                 if (processIds.Count == 0 || processIds.Contains(data.ProcessID))
                 {
-                    for (int i = 0; i < analysisContext.Analyzers.Count; i++)
+                    if (traceLog.ProcessMap.TryGetProcess(data.ProcessID, data.TimeStampRelativeMSec, out Process? process))
                     {
-                        IDataAnalyzer analyzer = analysisContext.Analyzers[i];
-                        if (analyzer.OnData(analysisContext, data))
+                        for (int i = 0; i < analysisContext.Analyzers.Count; i++)
                         {
-                            processedEventCount++;
-                        }
+                            IDataAnalyzer analyzer = analysisContext.Analyzers[i];
+                            if (analyzer.OnData(analysisContext, process, data))
+                            {
+                                processedEventCount++;
+                            }
 
-                        eventCount++;
+                            eventCount++;
+                        }
                     }
                 }
             }

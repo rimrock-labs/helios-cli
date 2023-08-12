@@ -48,7 +48,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
         }
 
         /// <inheritdoc />
-        public abstract bool OnData(AnalysisContext context, TraceEvent data);
+        public abstract bool OnData(AnalysisContext context, Process process, TraceEvent data);
 
         /// <inheritdoc />
         public virtual void OnEnd(AnalysisContext context)

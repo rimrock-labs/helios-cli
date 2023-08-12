@@ -17,9 +17,10 @@ namespace Rimrock.Helios.Analysis.Analyzers
         /// Called when new data is available.
         /// </summary>
         /// <param name="context">The context.</param>
+        /// <param name="process">The process.</param>
         /// <param name="data">The data.</param>
         /// <returns>true if data was processed, false otherwise.</returns>
-        bool OnData(AnalysisContext context, TraceEvent data);
+        bool OnData(AnalysisContext context, Process process, TraceEvent data);
 
         /// <summary>
         /// Called at the end of analysis.
