@@ -6,9 +6,10 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Analysis.OutputFormats;
+    using Rimrock.Helios.Collection;
 
     [DataAnalyzer(Name = "CPU")]
-    [WindowsProfilingDefinition(
+    [PerfViewAgent.ProfilingDefinition(
         ClrEvents = new[] { "Stack" },
         KernelEvents = new[] { "Profile" })]
     internal class CpuDataAnalyzer : BaseDataAnalyzer

@@ -1,23 +1,24 @@
-namespace Rimrock.Helios.Common
+namespace Rimrock.Helios.Common.Graph
 {
     /// <summary>
     /// Node interface.
     /// </summary>
-    public interface INode
+    public interface INode<TNode>
+        where TNode : INode<TNode>
     {
         /// <summary>
         /// Gets or sets the parent.
         /// </summary>
-        INode? Parent { get; set; }
+        TNode? Parent { get; set; }
 
         /// <summary>
         /// Gets or sets the child.
         /// </summary>
-        INode? Child { get; set; }
+        TNode? Child { get; set; }
 
         /// <summary>
         /// Gets or sets the sibling.
         /// </summary>
-        INode? Sibling { get; set; }
+        TNode? Sibling { get; set; }
     }
 }

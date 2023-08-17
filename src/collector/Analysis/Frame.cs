@@ -1,6 +1,7 @@
 namespace Rimrock.Helios.Analysis
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Frame class.
@@ -52,6 +53,34 @@ namespace Rimrock.Helios.Analysis
         /// Gets or sets the callee.
         /// </summary>
         public Frame? Callee { get; set; }
+
+        /// <summary>
+        /// Enumerates up the stack.
+        /// </summary>
+        /// <returns>The enumerable.</returns>
+        public IEnumerable<Frame> EnumerateUpStack()
+        {
+            Frame frame = this;
+            while (frame.Callee != null)
+            {
+                yield return frame;
+                frame = frame.Callee;
+            }
+        }
+
+        /// <summary>
+        /// Enumerates down the stack.
+        /// </summary>
+        /// <returns>The enumerable.</returns>
+        public IEnumerable<Frame> EnumerateDownStack()
+        {
+            Frame frame = this;
+            while (frame.Caller != null)
+            {
+                yield return frame;
+                frame = frame.Caller;
+            }
+        }
 
         /// <inheritdoc />
         public override bool Equals(object? obj) =>

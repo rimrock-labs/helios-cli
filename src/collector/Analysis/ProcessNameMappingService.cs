@@ -142,6 +142,7 @@ namespace Rimrock.Helios.Analysis
 
             public string Parse(string name, string commandLine)
             {
+                name = this.TargetProcessName + "#Shell";
                 foreach (string option in Options)
                 {
                     if (commandLine.IndexOf(option, StringComparison.OrdinalIgnoreCase) != -1)

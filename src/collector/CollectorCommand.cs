@@ -88,8 +88,8 @@ namespace Rimrock.Helios.Collector
 
                 HashSet<string> kernelEvents = new(StringComparer.OrdinalIgnoreCase) { "Process", "ImageLoad" };
                 HashSet<string> clrEvents = new(StringComparer.OrdinalIgnoreCase) { "Loader" };
-                kernelEvents.AddRange(WindowsProfilingDefinitionAttribute.GetKernelEvents(analyzerTypes));
-                clrEvents.AddRange(WindowsProfilingDefinitionAttribute.GetClrEvents(analyzerTypes));
+                kernelEvents.AddRange(PerfViewAgent.ProfilingDefinitionAttribute.GetKernelEvents(analyzerTypes));
+                clrEvents.AddRange(PerfViewAgent.ProfilingDefinitionAttribute.GetClrEvents(analyzerTypes));
 
                 PerfViewAgent.Configuration configuration = new()
                 {
