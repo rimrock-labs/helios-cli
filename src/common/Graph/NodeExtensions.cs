@@ -13,6 +13,7 @@ namespace Rimrock.Helios.Common.Graph
         /// </summary>
         /// <param name="node">The node.</param>
         /// <param name="child">The child.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
         public static void AddChild<TNode>(this TNode node, TNode child)
             where TNode : INode<TNode>
         {
@@ -26,6 +27,7 @@ namespace Rimrock.Helios.Common.Graph
         /// </summary>
         /// <param name="node">The node.</param>
         /// <param name="sibling">The sibling.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
         public static void AddSibling<TNode>(this TNode node, TNode sibling)
             where TNode : INode<TNode>
         {
@@ -50,6 +52,7 @@ namespace Rimrock.Helios.Common.Graph
         /// <param name="target">The target.</param>
         /// <param name="comparer">The comparer.</param>
         /// <param name="child">The child.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
         /// <returns>true if successful, false otherwise.</returns>
         public static bool TryFindChild<TNode>(this TNode parent, TNode target, IEqualityComparer<TNode> comparer, [NotNullWhen(true)] out TNode? child)
             where TNode : class?, INode<TNode>
@@ -82,6 +85,7 @@ namespace Rimrock.Helios.Common.Graph
         /// <param name="target">The target.</param>
         /// <param name="comparer">The comparer.</param>
         /// <param name="sibling">The sibling.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
         /// <returns>true if successful, false otherwise.</returns>
         public static bool TryFindSibling<TNode>(this TNode node, TNode target, IEqualityComparer<TNode> comparer, [NotNullWhen(true)] out TNode? sibling)
             where TNode : class?, INode<TNode>
@@ -113,6 +117,7 @@ namespace Rimrock.Helios.Common.Graph
         /// Enumerates depth first through the node graph.
         /// </summary>
         /// <param name="node">The start node.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
         /// <returns>The nodes.</returns>
         public static IEnumerable<TNode> EnumerateDepthFirst<TNode>(this TNode node)
             where TNode : class?, INode<TNode>

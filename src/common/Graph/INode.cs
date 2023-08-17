@@ -3,6 +3,7 @@ namespace Rimrock.Helios.Common.Graph
     /// <summary>
     /// Node interface.
     /// </summary>
+    /// <typeparam name="TNode">The node type.</typeparam>
     public interface INode<TNode>
         where TNode : INode<TNode>
     {

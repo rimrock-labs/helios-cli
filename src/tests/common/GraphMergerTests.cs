@@ -8,7 +8,7 @@ namespace Rimrock.Helios.Tests.Common;
 public class GraphMergerTests
 {
     [TestMethod]
-    public void TestMethod1()
+    public void MergeTest()
     {
         var graph1 = GetGraph("A>B>C");
         var graph2 = GetGraph("A>B>D");
@@ -20,9 +20,14 @@ public class GraphMergerTests
         merger.MergeGraph(graph3, graph1, comparer);
 
         Assert.AreEqual("ABC", Navigate(">>>", graph1));
+        Assert.AreEqual(1, GetNodeValue(">>>", graph1));
         Assert.AreEqual("ABC", Navigate(">>>>", graph1));
         Assert.AreEqual("ABCD", Navigate(">>^", graph1));
+        Assert.AreEqual(1, GetNodeValue(">>^", graph1));
         Assert.AreEqual("ABCDE", Navigate(">>^^", graph1));
+        Assert.AreEqual(1, GetNodeValue(">>^^", graph1));
+        Assert.AreEqual(3, GetNodeValue("", graph1));
+        Assert.AreEqual(3, GetNodeValue(">", graph1));
 
         graph2 = GetGraph("A>B>E>F");
         merger.MergeGraph(graph2, graph1, comparer);
@@ -31,6 +36,13 @@ public class GraphMergerTests
         graph2 = GetGraph("X>Y>Z");
         merger.MergeGraph(graph2, graph1, comparer);
         Assert.AreEqual("AXYZ", Navigate("^>>", graph1));
+
+        graph3 = GetGraph("X>Y>0");
+        merger.MergeGraph(graph3, graph2, comparer);
+        merger.MergeGraph(graph2, graph1, comparer);
+        Assert.AreEqual("AXYZ", Navigate("^>>", graph1));
+        Assert.AreEqual("AXYZ0", Navigate("^>>^", graph1));
+        Assert.AreEqual(4, GetNodeValue("", graph1));
     }
 
     private static string Navigate(string instruction, Node graph)
@@ -52,6 +64,26 @@ public class GraphMergerTests
         }
 
         return builder.ToString();
+    }
+
+    private static int GetNodeValue(string instruction, Node graph)
+    {
+        int value = 0;
+        Node? node = graph;
+        using StringReader reader = new(instruction);
+        while (node != null)
+        {
+            value = node.Value;
+            node = reader.Read() switch
+            {
+                '>' => node.Child,
+                '^' => node.Sibling,
+                '<' => node.Parent,
+                _ => null,
+            };
+        }
+
+        return value;
     }
 
     private static Node GetGraph(string value, int metric = 1)
@@ -96,7 +128,6 @@ public class GraphMergerTests
             target.Value += source.Value;
         }
     }
-
 
     private class Node : INode<Node>
     {
