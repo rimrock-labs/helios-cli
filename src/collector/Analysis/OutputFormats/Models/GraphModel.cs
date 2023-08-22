@@ -11,7 +11,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     public class GraphModel : IDataModel
     {
         private readonly ILogger<GraphModel> logger;
-        private readonly GraphMerger<Frame, StackData> merger;
+        private readonly Merger merger;
         private Frame? graph;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         public GraphModel(ILogger<GraphModel> logger)
         {
             this.logger = logger;
-            this.merger = new GraphMerger<Frame, StackData>();
+            this.merger = new Merger();
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
             else
             {
-                this.merger.MergeGraph(data.StackRoot, this.graph);
+                this.merger.MergeGraph(data.StackRoot, this.graph, context: data);
             }
         }
 
@@ -77,7 +77,11 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             protected override Frame OnInsert(Frame node, StackData? context = null)
             {
                 Frame clone = node.CloneStackFromRoot();
-                clone.EnumerateChildStack().Select(SetMetrics(context!)).Iterate();
+                if (context != null)
+                {
+                    clone.EnumerateChildStack().Select(SetMetrics(context)).Iterate();
+                }
+
                 return clone;
             }
 

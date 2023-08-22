@@ -17,8 +17,8 @@ namespace Rimrock.Helios.Common.Graph
         /// <param name="sourceRoot">The source graph root.</param>
         /// <param name="targetRoot">The target graph root (accumulator).</param>
         /// <param name="comparer">The comparer to use for node equality.</param>
-        /// <param name="mergeContext">The merge operation context.</param>
-        public void MergeGraph(TNode sourceRoot, TNode targetRoot, IEqualityComparer<TNode>? comparer = null, TContext? mergeContext = null)
+        /// <param name="context">The merge operation context.</param>
+        public void MergeGraph(TNode sourceRoot, TNode targetRoot, IEqualityComparer<TNode>? comparer = null, TContext? context = null)
         {
             comparer ??= EqualityComparer<TNode>.Default;
             Stack<(TNode Source, TNode Target)> stack = new();
@@ -43,12 +43,12 @@ namespace Rimrock.Helios.Common.Graph
                 {
                     // no match at this level
                     // add source as subtree
-                    targetIterator.AddSibling(this.OnInsert(sourceIterator));
+                    targetIterator.AddSibling(this.OnInsert(sourceIterator, context));
                 }
 
                 if (matched)
                 {
-                    this.MergeNode(sourceIterator, targetIterator, mergeContext);
+                    this.MergeNode(sourceIterator, targetIterator, context);
 
                     // more children to merge
                     if (sourceIterator.Child != null)
@@ -61,7 +61,7 @@ namespace Rimrock.Helios.Common.Graph
                         else
                         {
                             // target has no children so reparent source
-                            targetIterator.AddChild(this.OnInsert(sourceIterator.Child));
+                            targetIterator.AddChild(this.OnInsert(sourceIterator.Child, context));
                         }
                     }
 
@@ -74,6 +74,12 @@ namespace Rimrock.Helios.Common.Graph
             }
         }
 
+        /// <summary>
+        /// Called when a node is inserted without merging with existing one.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>The node to insert.</returns>
         protected virtual TNode OnInsert(TNode node, TContext? context = null) =>
             node;
 
@@ -82,8 +88,8 @@ namespace Rimrock.Helios.Common.Graph
         /// </summary>
         /// <param name="source">The source node.</param>
         /// <param name="target">The target node.</param>
-        /// <param name="mergeContext">The merge operation context.</param>
-        protected virtual void MergeNode(TNode source, TNode target, TContext? mergeContext = null)
+        /// <param name="context">The merge operation context.</param>
+        protected virtual void MergeNode(TNode source, TNode target, TContext? context = null)
         {
             // implement this to accumulate node level data
         }

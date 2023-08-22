@@ -2,6 +2,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Security;
@@ -37,9 +38,8 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             Dictionary<Frame, int> frameLookup = new(Frame.NameEqualityComparer.Instance);
             Dictionary<Frame, int> stackLookup = new();
 
-            // Storing raw data in segmented lists.
-            List<(int, int, int)> stackList = new();
-            List<(int, int, ulong)> sampleList = new();
+            List<(int StackId, int CallerId, int FrameId)> stacks = new();
+            List<(int SampleId, int StackId, ulong Count, ulong Weight)> samples = new();
 
             int sampleId = 0;
             foreach (Frame frame in model.GraphRoot?.EnumerateDepthFirst() ?? Enumerable.Empty<Frame>())
@@ -61,12 +61,15 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                     }
                 }
 
-                stackList.Add((stackId, callerId, frameId));
+                stacks.Add((stackId, callerId, frameId));
 
-                ulong metric = frame.Child == null ? 1ul : 0; // frame.Metrics?[0].Exclusive ?? 1;
-                if (metric > 0)
+                Debug.Assert(frame.Metrics != null, "Frame has unset metrics.");
+                if (frame.Metrics != null && frame.Child == null)
                 {
-                    sampleList.Add((sampleId++, stackId, metric));
+                    // only collect leaf node metrics
+                    ulong metric1 = frame.Metrics[0].Exclusive;
+                    ulong metric2 = frame.Metrics[1].Exclusive;
+                    samples.Add((sampleId++, stackId, metric1, metric2));
                 }
             }
 
@@ -82,19 +85,19 @@ namespace Rimrock.Helios.Analysis.OutputFormats
 
             writer.WriteLine("""</Frames>""");
 
-            writer.WriteLine($"""<Stacks Count="{stackList.Count}">""");
-            foreach (var stack in stackList)
+            writer.WriteLine($"""<Stacks Count="{stacks.Count}">""");
+            foreach (var stack in stacks)
             {
-                writer.WriteLine($"""<Stack ID="{stack.Item1}" CallerID="{stack.Item2}" FrameID="{stack.Item3}" />""");
+                writer.WriteLine($"""<Stack ID="{stack.StackId}" CallerID="{stack.CallerId}" FrameID="{stack.FrameId}" />""");
             }
 
             writer.WriteLine("""</Stacks>""");
 
-            writer.WriteLine($"""<Samples Count="{sampleList.Count}">""");
+            writer.WriteLine($"""<Samples Count="{samples.Count}">""");
 
-            foreach (var sample in sampleList)
+            foreach (var sample in samples)
             {
-                writer.WriteLine($"""<Sample ID="{sample.Item1}" Count="1" StackID="{sample.Item2}" Metric="{sample.Item3}" />""");
+                writer.WriteLine($"""<Sample ID="{sample.SampleId}" Count="{sample.Count}" StackID="{sample.StackId}" Metric="{sample.Weight}" />""");
             }
 
             writer.WriteLine("</Samples>");
