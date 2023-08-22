@@ -121,9 +121,9 @@ public class GraphMergerTests
             StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name);
     }
 
-    private class Merger : GraphMerger<Node>
+    private class Merger : GraphMerger<Node, object>
     {
-        protected override void MergeNode(Node source, Node target)
+        protected override void MergeNode(Node source, Node target, object? context = null)
         {
             target.Value += source.Value;
         }
@@ -136,5 +136,12 @@ public class GraphMergerTests
         public Node? Sibling { get; set; }
         public required string Name { get; init; }
         public int Value { get; set; }
+
+        public Node Clone() =>
+            new()
+            {
+                Name = this.Name,
+                Value = this.Value,
+            };
     }
 }

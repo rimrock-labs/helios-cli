@@ -2,11 +2,14 @@ namespace Rimrock.Helios.Analysis
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
+    using System.Linq;
     using Microsoft.Diagnostics.Symbols;
     using Microsoft.Diagnostics.Tracing.Etlx;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Common.Graph;
 
     /// <summary>
     /// Symbol store class.
@@ -53,14 +56,18 @@ namespace Rimrock.Helios.Analysis
         /// Tries to resolve the stack.
         /// </summary>
         /// <param name="inStack">The input stack.</param>
-        /// <param name="outStack">The output stack.</param>
+        /// <param name="process">The process.</param>
+        /// <param name="outStackLeaf">The output stack.</param>
+        /// <param name="outStackRoot">The root of the stack.</param>
         /// <returns>true if successful, false otherwise.</returns>
         public bool TryResolve(
             TraceCallStack? inStack,
-            [NotNullWhen(true)] out Frame? outStack)
+            Process process,
+            [NotNullWhen(true)] out Frame? outStackLeaf,
+            [NotNullWhen(true)] out Frame? outStackRoot)
         {
             bool result = false;
-            outStack = default;
+            outStackLeaf = default;
             Frame? previous = default;
             if (inStack != null)
             {
@@ -79,19 +86,31 @@ namespace Rimrock.Helios.Analysis
                         Frame frame = new(moduleName, methodName);
                         if (previous == null)
                         {
-                            outStack = previous = frame;
+                            outStackLeaf = previous = frame;
                             result = true;
                         }
                         else
                         {
-                            previous.Caller = frame;
-                            frame.Callee = previous;
+                            frame.AddChild(previous);
                             previous = frame;
                         }
                     }
 
                     inStack = inStack.Caller;
                 }
+
+                if (previous != null)
+                {
+                    Frame frame = new("Process", process.Name);
+                    frame.AddChild(previous);
+                    previous = frame;
+                }
+            }
+
+            outStackRoot = previous;
+            if (result)
+            {
+                Debug.Assert(outStackLeaf != null && outStackLeaf.Child == null && outStackLeaf.EnumerateParentStack().Last().Parent == null, "Stack order incorrect.");
             }
 
             return result;

@@ -2,36 +2,46 @@ namespace Rimrock.Helios.Analysis
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using Rimrock.Helios.Common.Graph;
 
     /// <summary>
     /// Frame class.
     /// </summary>
-    public sealed class Frame : IEquatable<Frame>
+    public sealed class Frame : INode<Frame>
     {
         private readonly int hashCode;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Frame"/> class.
         /// </summary>
-        /// <param name="name">The name.</param>
-        public Frame(string name)
-            : this(name, null)
+        /// <param name="moduleName">The module name.</param>
+        /// <param name="methodName">The method name.</param>
+        public Frame(string moduleName, string? methodName = null)
         {
+            this.ModuleName = moduleName;
+            this.MethodName = methodName ?? string.Empty;
+
+            this.hashCode = HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(this.ModuleName),
+                this.MethodName.GetHashCode());
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Frame"/> class.
         /// </summary>
-        /// <param name="moduleName">The module name.</param>
-        /// <param name="methodName">The method name.</param>
-        public Frame(string moduleName, string? methodName)
+        /// <param name="other">The other frame.</param>
+        public Frame(Frame other)
+            : this(other.ModuleName, other.MethodName)
         {
-            this.ModuleName = moduleName;
-            this.MethodName = methodName;
-
-            this.hashCode = HashCode.Combine(
-                StringComparer.OrdinalIgnoreCase.GetHashCode(this.ModuleName),
-                this.MethodName?.GetHashCode() ?? 0);
+            if (other.Metrics != null)
+            {
+                this.Metrics = new Metric[other.Metrics.Length];
+                for (int m = 0; m < other.Metrics.Length; m++)
+                {
+                    this.Metrics[m] = other.Metrics[m].Clone();
+                }
+            }
         }
 
         /// <summary>
@@ -42,66 +52,25 @@ namespace Rimrock.Helios.Analysis
         /// <summary>
         /// Gets the method name.
         /// </summary>
-        public string? MethodName { get; }
-
-        /// <summary>
-        /// Gets or sets the caller.
-        /// </summary>
-        public Frame? Caller { get; set; }
-
-        /// <summary>
-        /// Gets or sets the callee.
-        /// </summary>
-        public Frame? Callee { get; set; }
-
-        /// <summary>
-        /// Enumerates up the stack.
-        /// </summary>
-        /// <returns>The enumerable.</returns>
-        public IEnumerable<Frame> EnumerateUpStack()
-        {
-            Frame frame = this;
-            while (frame.Callee != null)
-            {
-                yield return frame;
-                frame = frame.Callee;
-            }
-        }
-
-        /// <summary>
-        /// Enumerates down the stack.
-        /// </summary>
-        /// <returns>The enumerable.</returns>
-        public IEnumerable<Frame> EnumerateDownStack()
-        {
-            Frame frame = this;
-            while (frame.Caller != null)
-            {
-                yield return frame;
-                frame = frame.Caller;
-            }
-        }
+        public string MethodName { get; }
 
         /// <inheritdoc />
-        public override bool Equals(object? obj) =>
-            this.Equals(obj as Frame);
+        public Frame? Parent { get; set; }
 
         /// <inheritdoc />
-        public bool Equals(Frame? other)
-        {
-            if (object.ReferenceEquals(this, other))
-            {
-                return true;
-            }
+        public Frame? Child { get; set; }
 
-            if (other is null || (this.hashCode != other.hashCode))
-            {
-                return false;
-            }
+        /// <inheritdoc />
+        public Frame? Sibling { get; set; }
 
-            return StringComparer.OrdinalIgnoreCase.Equals(this.ModuleName, other.ModuleName) &&
-                   string.Equals(this.MethodName, other.MethodName);
-        }
+        /// <summary>
+        /// Gets or sets the metrics.
+        /// </summary>
+        public Metric[]? Metrics { get; set; }
+
+        /// <inheritdoc />
+        public Frame Clone() =>
+            new(this);
 
         /// <summary>
         /// Checks whether the frame module name and method name match provided values.
@@ -113,7 +82,56 @@ namespace Rimrock.Helios.Analysis
             StringComparer.OrdinalIgnoreCase.Equals(this.ModuleName, moduleName) &&
             string.Equals(this.MethodName, methodName);
 
-        /// <inheritdoc />
-        public override int GetHashCode() => this.hashCode;
+        /// <summary>
+        /// Metric struct.
+        /// </summary>
+        public readonly struct Metric
+        {
+            /// <summary>
+            /// Gets the inclusive count.
+            /// </summary>
+            public required ulong Inclusive { get; init; }
+
+            /// <summary>
+            /// Gets the exclusive count.
+            /// </summary>
+            public required ulong Exclusive { get; init; }
+
+            /// <summary>
+            /// Clones this instance.
+            /// </summary>
+            /// <returns>The metric.</returns>
+            public Metric Clone() =>
+                new()
+                {
+                    Inclusive = this.Inclusive,
+                    Exclusive = this.Exclusive,
+                };
+        }
+
+        /// <summary>
+        /// <see cref="Frame" /> name equality comparer.
+        /// </summary>
+        public sealed class NameEqualityComparer : IEqualityComparer<Frame>
+        {
+            /// <summary>
+            /// An instance of the comparer.
+            /// </summary>
+            public static readonly NameEqualityComparer Instance = new();
+
+            private NameEqualityComparer()
+            {
+            }
+
+            /// <inheritdoc />
+            public bool Equals(Frame? x, Frame? y) =>
+                object.ReferenceEquals(x, y) ||
+                (x != null && y != null &&
+                 x.Equals(y.ModuleName, y.MethodName));
+
+            /// <inheritdoc />
+            public int GetHashCode([DisallowNull] Frame obj) =>
+                obj.hashCode;
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     using System.Linq;
     using System.Text;
     using Microsoft.Extensions.Logging;
+    using Rimrock.Helios.Common.Graph;
 
     /// <summary>
     /// Stack model class.
@@ -28,7 +29,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         /// Gets the model data.
         /// </summary>
         /// <returns>The data.</returns>
-        public IEnumerable<KeyValuePair<StackData, Statistics>> GetData() => this.data;
+        public IReadOnlyDictionary<StackData, Statistics> GetData() => this.data;
 
         /// <inheritdoc />
         public void AddData(IData data)
@@ -44,7 +45,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         }
 
         /// <inheritdoc />
-        public IReadOnlyList<string> GetColumnNames() => new[] { "Stack", "Tags", "Count", "Weight" };
+        public IReadOnlyList<string> GetColumnNames() => new[] { "Stack", "Count", "Weight" };
 
         /// <inheritdoc />
         public IEnumerable<IReadOnlyList<string>> GetDataRows()
@@ -54,8 +55,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             {
                 row.Clear();
                 StringBuilder builder = new();
-                Frame? frame = data.Key.CallStack;
-                while (frame != null)
+                foreach (Frame frame in data.Key.StackLeaf.EnumerateParentStack())
                 {
                     builder.Append(frame.ModuleName);
                     if (!string.IsNullOrEmpty(frame.MethodName))
@@ -64,14 +64,6 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                     }
 
                     builder.Append(';');
-                    frame = frame.Caller;
-                }
-
-                row.Add(builder.ToString());
-                builder.Clear();
-                foreach (string tag in data.Key.Tags)
-                {
-                    builder.Append(tag).Append(';');
                 }
 
                 row.Add(builder.ToString());
@@ -91,7 +83,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                 this.data[data] = statistics = new Statistics();
             }
 
-            statistics.Count++;
+            statistics.Count += data.Count;
             statistics.Weight += data.Weight;
         }
 
@@ -115,19 +107,45 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             /// <inheritdoc/>
             public override bool Equals(StackData? x, StackData? y)
             {
-                return (x == null && y == null) ||
-                    (x != null && y != null &&
-                    x.Tags.SetEquals(y.Tags) &&
-                    object.Equals(x.CallStack, y.CallStack));
+                bool result = (x == null && y == null) || (x != null && y != null);
+                if (result)
+                {
+                    Frame? xFrame = x?.StackLeaf!;
+                    Frame? yFrame = y?.StackLeaf!;
+                    do
+                    {
+                        result = object.Equals(xFrame, yFrame);
+                        xFrame = xFrame.Parent;
+                        yFrame = yFrame.Parent;
+                    }
+                    while (result && xFrame != null && yFrame != null);
+                }
+
+                return result;
             }
 
             /// <inheritdoc/>
             public override int GetHashCode(StackData obj)
             {
                 return HashCode.Combine(
-                    obj.CallStack.GetHashCode(),
-                    obj.Tags.Select(_ => StringComparer.OrdinalIgnoreCase.GetHashCode(_)).Aggregate((hash, _) => HashCode.Combine(hash, _)));
+                    obj.StackLeaf.EnumerateParentStack().Select(_ => _.GetHashCode()));
             }
+        }
+
+        /// <summary>
+        /// Statistics class.
+        /// </summary>
+        public sealed class Statistics
+        {
+            /// <summary>
+            /// Gets or sets the count.
+            /// </summary>
+            public ulong Count { get; set; } = 0;
+
+            /// <summary>
+            /// Gets or sets the weight.
+            /// </summary>
+            public ulong Weight { get; set; } = 0;
         }
     }
 }

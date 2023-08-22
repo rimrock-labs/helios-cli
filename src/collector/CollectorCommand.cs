@@ -135,7 +135,7 @@ namespace Rimrock.Helios.Collector
                 symbolPath = symbolPath.Replace("*", $"*{symbolStoreCache}*");
             }
 
-            SymbolStore symbolStore = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, Path.Combine(workingDirectory, "symbol-resolution.log"), symbolPath);
+            SymbolStore symbolStore = ActivatorUtilities.CreateInstance<SymbolStore>(this.services, Path.ChangeExtension(tracePath, "symbol.log"), symbolPath);
             symbolStore.ResolveNativeSymbols = context.ParseResult.GetValueForOption(ResolveNativeSymbolsOption);
             AnalysisContext analysisContext = new()
             {

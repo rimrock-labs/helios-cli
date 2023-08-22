@@ -1,5 +1,6 @@
 namespace Rimrock.Helios.Analysis.OutputFormats
 {
+    using System;
     using System.Linq;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Common.Graph;
@@ -10,7 +11,8 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     public class GraphModel : IDataModel
     {
         private readonly ILogger<GraphModel> logger;
-        private Node? root;
+        private readonly GraphMerger<Frame, StackData> merger;
+        private Frame? graph;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GraphModel"/> class.
@@ -19,7 +21,13 @@ namespace Rimrock.Helios.Analysis.OutputFormats
         public GraphModel(ILogger<GraphModel> logger)
         {
             this.logger = logger;
+            this.merger = new GraphMerger<Frame, StackData>();
         }
+
+        /// <summary>
+        /// Gets the graph root.
+        /// </summary>
+        public Frame? GraphRoot => this.graph;
 
         /// <inheritdoc />
         public void AddData(IData data)
@@ -34,30 +42,60 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
         }
 
+        private static Func<Frame, int, Frame> SetMetrics(StackData data)
+        {
+            Frame Function(Frame frame, int index)
+            {
+                bool exclusive = frame.Child == null;
+                frame.Metrics = new Frame.Metric[2]
+                {
+                    new() { Inclusive = data.Count, Exclusive = exclusive ? data.Count : 0 },
+                    new() { Inclusive = data.Weight, Exclusive = exclusive ? data.Weight : 0 },
+                };
+
+                return frame;
+            }
+
+            return Function;
+        }
+
         private void AddData(StackData data)
         {
-            this.root ??= new Node();
-            foreach (Frame frame in data.CallStack.EnumerateDownStack().Last().EnumerateUpStack())
+            if (this.graph == null)
             {
-                // merge starting at root
+                this.graph = data.StackRoot.CloneStackFromRoot();
+                this.graph.EnumerateChildStack().Select(SetMetrics(data)).Iterate();
+            }
+            else
+            {
+                this.merger.MergeGraph(data.StackRoot, this.graph);
             }
         }
 
-        private class Node : INode
+        private class Merger : GraphMerger<Frame, StackData>
         {
-            public INode? Parent { get; set; }
+            protected override Frame OnInsert(Frame node, StackData? context = null)
+            {
+                Frame clone = node.CloneStackFromRoot();
+                clone.EnumerateChildStack().Select(SetMetrics(context!)).Iterate();
+                return clone;
+            }
 
-            public INode? Child { get; set; }
-
-            public INode? Sibling { get; set; }
-
-            public ulong InclusiveCount { get; set; }
-
-            public ulong InclusiveWeight { get; set; }
-
-            public ulong ExclusiveCount { get; set; }
-
-            public ulong ExclusiveWeight { get; set; }
+            protected override void MergeNode(Frame source, Frame target, StackData? context = null)
+            {
+                int metricCount = target.Metrics?.Length ?? 0;
+                if (metricCount > 0)
+                {
+                    for (int m = 0; m < metricCount; m++)
+                    {
+                        target.Metrics![m] = new Frame.Metric()
+                        {
+                            Inclusive = source.Metrics?[m].Inclusive ?? 0,
+                            Exclusive = source.Metrics?[m].Exclusive ?? 0,
+                        };
+                    }
+                }
+            }
         }
     }
 }

@@ -23,14 +23,9 @@ namespace Rimrock.Helios.Analysis.Analyzers
         {
             bool result = false;
             if (traceEvent is SampledProfileTraceData &&
-                context.Symbols.TryResolve(traceEvent.CallStack(), out Frame? frame))
+                context.Symbols.TryResolve(traceEvent.CallStack(), process, out Frame? stackLeaf, out Frame? stackRoot))
             {
-                StackData data = new(frame);
-
-                // TODO: add additional predefined tags
-                data.AddProcessTag(process.Name);
-
-                this.AddData(data);
+                this.AddData(new StackData(stackLeaf, stackRoot));
                 result = true;
             }
 

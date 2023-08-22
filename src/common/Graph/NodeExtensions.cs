@@ -9,6 +9,90 @@ namespace Rimrock.Helios.Common.Graph
     public static class NodeExtensions
     {
         /// <summary>
+        /// Clones the stack from the leaf.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <returns>The leaf of the stack.</returns>
+        public static TNode CloneStackFromLeaf<TNode>(this TNode node)
+            where TNode : class?, INode<TNode>
+        {
+            TNode? result = null;
+            TNode? previous = null;
+            foreach (TNode parent in node.EnumerateParentStack())
+            {
+                TNode clone = parent.Clone();
+                result ??= clone;
+
+                if (previous != null)
+                {
+                    clone.AddChild(previous);
+                }
+
+                previous = clone;
+            }
+
+            return result!;
+        }
+
+        /// <summary>
+        /// Clones the stack from the root.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <returns>The root of the stack.</returns>
+        public static TNode CloneStackFromRoot<TNode>(this TNode node)
+            where TNode : class?, INode<TNode>
+        {
+            TNode? result = null;
+            TNode? previous = null;
+            foreach (TNode parent in node.EnumerateChildStack())
+            {
+                TNode clone = parent.Clone();
+                result ??= clone;
+
+                previous?.AddChild(clone);
+                previous = clone;
+            }
+
+            return result!;
+        }
+
+        /// <summary>
+        /// Enumerates up the parents.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<TNode> EnumerateParentStack<TNode>(this TNode node)
+            where TNode : INode<TNode>
+        {
+            yield return node;
+            while (node.Parent != null)
+            {
+                node = node.Parent;
+                yield return node;
+            }
+        }
+
+        /// <summary>
+        /// Enumerates down the children.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<TNode> EnumerateChildStack<TNode>(this TNode node)
+            where TNode : INode<TNode>
+        {
+            yield return node;
+            while (node.Child != null)
+            {
+                node = node.Child;
+                yield return node;
+            }
+        }
+
+        /// <summary>
         /// Adds child.
         /// </summary>
         /// <param name="node">The node.</param>
@@ -124,7 +208,13 @@ namespace Rimrock.Helios.Common.Graph
         {
             Stack<TNode> stack = new();
             stack.Clear();
-            stack.Push(node);
+
+            while (node != null)
+            {
+                stack.Push(node);
+                node = node.Sibling!;
+            }
+
             while (stack.TryPop(out TNode? stackNode))
             {
                 yield return stackNode;

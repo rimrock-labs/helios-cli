@@ -21,5 +21,11 @@ namespace Rimrock.Helios.Common.Graph
         /// Gets or sets the sibling.
         /// </summary>
         TNode? Sibling { get; set; }
+
+        /// <summary>
+        /// Clones this instance (shallow).
+        /// </summary>
+        /// <returns>The clone.</returns>
+        TNode Clone();
     }
 }
