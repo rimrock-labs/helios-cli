@@ -15,10 +15,6 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     {
         private readonly FileSystem fileSystem;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PerfViewOutputFormat"/> class.
-        /// </summary>
-        /// <param name="fileSystem">The file system.</param>
         public PerfViewOutputFormat(FileSystem fileSystem)
         {
             this.fileSystem = fileSystem;
