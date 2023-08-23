@@ -2,12 +2,10 @@
 
 This is the main focus of the Rimrock dev lab!
 
-We are looking to develop a production-grade performance data collection system.  
+We are developing a production-grade performance data collection system.  
 This system will not only let teams understand what their dotnet applications are doing (at the code level) but also help teams improve their applications by automatically spotting well-known performance bottlenecks.
 
-We are just coming online so stay tuned!
-
-## ⚒️ Active Work Areas (as of 8/11/2023)
+## ⚒️ Active Work Progress (as of 8/23/2023)
 
 The below work is geared towards an **ALPHA** release.
 
@@ -18,10 +16,25 @@ The below work is geared towards an **ALPHA** release.
   - [x] End-to-End plumbing (Host, DI, Configuration, Logging)
   - [ ] Additional data streams (Memory allocations, Exceptions)
   - [ ] Additional data format,
-    - [ ] PerfView XML
+    - [x] PerfView XML
     - [ ] Chromium (?)
-    - [ ] Speedscope (?)
+    - [x] Speedscope
     - [ ] A binary (graph-like) data format
+
+Several output format (and UI) is now supported including,
+
+- CSV
+- PerfView XML
+  ![image](https://github.com/rimrock-labs/helios-cli/assets/1128553/9abfe2ce-875b-46a3-be36-dd684a7e6a20)
+
+- Speedscope
+  ![image](https://github.com/rimrock-labs/helios-cli/assets/1128553/785b5a1c-2735-45da-b0a4-cf0ae0d0529f)
+
+`helios-cli` is also fully functional at the command line to both collect and analyze,
+
+```PowerShell
+.\helios-cli.exe collect --output-directory "{pwd}\Collections\{guid}" --duration "00:00:10" --symbol-store-cache "D:\symbols" --output-format "speedscope" --data-analyzer "CPU" --verbose
+```
 
 ## 🛣️ Roadmap
 
@@ -49,4 +62,5 @@ The near future goals include,
 
 ## ⭐ Contributing
 
-If you have suggestions or ideas about any of the above, please join the discussion!
+Would like to contribute? Awesome!
+Please start by opening an issue or joining the discussion.
