@@ -83,8 +83,8 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                 this.data[data] = statistics = new Statistics();
             }
 
-            statistics.Count += data.Count;
-            statistics.Weight += data.Weight;
+            statistics.Count += data.StackRoot.InclusiveCount;
+            statistics.Weight += data.StackRoot.InclusiveWeight;
         }
 
         /// <summary>

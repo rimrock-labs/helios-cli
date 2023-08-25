@@ -34,14 +34,10 @@ namespace Rimrock.Helios.Analysis
         public Frame(Frame other)
             : this(other.ModuleName, other.MethodName)
         {
-            if (other.Metrics != null)
-            {
-                this.Metrics = new Metric[other.Metrics.Length];
-                for (int m = 0; m < other.Metrics.Length; m++)
-                {
-                    this.Metrics[m] = other.Metrics[m].Clone();
-                }
-            }
+            this.InclusiveCount = other.InclusiveCount;
+            this.InclusiveWeight = other.InclusiveWeight;
+            this.ExclusiveCount = other.ExclusiveCount;
+            this.ExclusiveWeight = other.ExclusiveWeight;
         }
 
         /// <summary>
@@ -64,9 +60,24 @@ namespace Rimrock.Helios.Analysis
         public Frame? Sibling { get; set; }
 
         /// <summary>
-        /// Gets or sets the metrics.
+        /// Gets or sets the incusive count.
         /// </summary>
-        public Metric[]? Metrics { get; set; }
+        public ulong InclusiveCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the inclusive weight.
+        /// </summary>
+        public ulong InclusiveWeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the excusive count.
+        /// </summary>
+        public ulong ExclusiveCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exclusive weight.
+        /// </summary>
+        public ulong ExclusiveWeight { get; set; }
 
         /// <inheritdoc />
         public Frame Clone() =>
@@ -96,17 +107,6 @@ namespace Rimrock.Helios.Analysis
             /// Gets the exclusive count.
             /// </summary>
             public required ulong Exclusive { get; init; }
-
-            /// <summary>
-            /// Clones this instance.
-            /// </summary>
-            /// <returns>The metric.</returns>
-            public Metric Clone() =>
-                new()
-                {
-                    Inclusive = this.Inclusive,
-                    Exclusive = this.Exclusive,
-                };
         }
 
         /// <summary>

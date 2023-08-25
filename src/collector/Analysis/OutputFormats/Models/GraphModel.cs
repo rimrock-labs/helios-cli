@@ -1,7 +1,5 @@
 namespace Rimrock.Helios.Analysis.OutputFormats
 {
-    using System;
-    using System.Linq;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Common.Graph;
 
@@ -42,29 +40,11 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
         }
 
-        private static Func<Frame, int, Frame> SetMetrics(StackData data)
-        {
-            Frame Function(Frame frame, int index)
-            {
-                bool exclusive = frame.Child == null;
-                frame.Metrics = new Frame.Metric[2]
-                {
-                    new() { Inclusive = data.Count, Exclusive = exclusive ? data.Count : 0 },
-                    new() { Inclusive = data.Weight, Exclusive = exclusive ? data.Weight : 0 },
-                };
-
-                return frame;
-            }
-
-            return Function;
-        }
-
         private void AddData(StackData data)
         {
             if (this.graph == null)
             {
                 this.graph = data.StackRoot.CloneStackFromRoot();
-                this.graph.EnumerateChildStack().Select(SetMetrics(data)).Iterate();
             }
             else
             {
@@ -77,28 +57,15 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             protected override Frame OnInsert(Frame node, StackData? context = null)
             {
                 Frame clone = node.CloneStackFromRoot();
-                if (context != null)
-                {
-                    clone.EnumerateChildStack().Select(SetMetrics(context)).Iterate();
-                }
-
                 return clone;
             }
 
             protected override void MergeNode(Frame source, Frame target, StackData? context = null)
             {
-                int metricCount = target.Metrics?.Length ?? 0;
-                if (metricCount > 0)
-                {
-                    for (int m = 0; m < metricCount; m++)
-                    {
-                        target.Metrics![m] = new Frame.Metric()
-                        {
-                            Inclusive = source.Metrics?[m].Inclusive ?? 0,
-                            Exclusive = source.Metrics?[m].Exclusive ?? 0,
-                        };
-                    }
-                }
+                target.InclusiveCount += source.InclusiveCount;
+                target.InclusiveWeight += source.InclusiveWeight;
+                target.ExclusiveCount += source.ExclusiveCount;
+                target.ExclusiveWeight += source.ExclusiveWeight;
             }
         }
     }

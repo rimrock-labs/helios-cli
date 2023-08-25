@@ -65,7 +65,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             {
                 if (frame.Child == null)
                 {
-                    weights.Add(frame.Metrics![0].Exclusive);
+                    weights.Add(frame.ExclusiveCount);
                     if (!first2)
                     {
                         writer.WriteLine(',');

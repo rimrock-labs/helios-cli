@@ -8,6 +8,7 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Rimrock.Helios.Analysis.OutputFormats;
+    using Rimrock.Helios.Common.Graph;
 
     /// <summary>
     /// Base data analyzer class.
@@ -64,6 +65,21 @@ namespace Rimrock.Helios.Analysis.Analyzers
                 {
                     view.Save(analyzerContext, context, model);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Applies inclusive metrics to stack.
+        /// </summary>
+        /// <param name="leaf">The stack leaf.</param>
+        /// <param name="count">The count.</param>
+        /// <param name="weight">The weight.</param>
+        protected static void ApplyInclusiveMetrics(Frame leaf, ulong count = 1, ulong weight = 1)
+        {
+            foreach (Frame frame in leaf.EnumerateParentStack())
+            {
+                frame.InclusiveCount += count;
+                frame.InclusiveWeight += weight;
             }
         }
 

@@ -19,12 +19,15 @@ namespace Rimrock.Helios.Analysis.Analyzers
         {
         }
 
-        public override bool OnData(AnalysisContext context, Process process, TraceEvent traceEvent)
+        public override bool OnData(AnalysisContext context, Process process, TraceEvent data)
         {
             bool result = false;
-            if (traceEvent is SampledProfileTraceData &&
-                context.Symbols.TryResolve(traceEvent.CallStack(), process, out Frame? stackLeaf, out Frame? stackRoot))
+            if (data is SampledProfileTraceData &&
+                context.Symbols.TryResolve(data.CallStack(), process, out Frame? stackLeaf, out Frame? stackRoot))
             {
+                ApplyInclusiveMetrics(stackLeaf);
+                stackLeaf.ExclusiveCount += 1;
+                stackLeaf.ExclusiveWeight += 1;
                 this.AddData(new StackData(stackLeaf, stackRoot));
                 result = true;
             }

@@ -59,12 +59,11 @@ namespace Rimrock.Helios.Analysis.OutputFormats
 
                 stacks.Add((stackId, callerId, frameId));
 
-                Debug.Assert(frame.Metrics != null, "Frame has unset metrics.");
-                if (frame.Metrics != null && frame.Child == null)
+                if (frame.Child == null)
                 {
                     // only collect leaf node metrics
-                    ulong metric1 = frame.Metrics[0].Exclusive;
-                    ulong metric2 = frame.Metrics[1].Exclusive;
+                    ulong metric1 = frame.ExclusiveCount;
+                    ulong metric2 = frame.ExclusiveWeight;
                     samples.Add((sampleId++, stackId, metric1, metric2));
                 }
             }
