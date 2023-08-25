@@ -48,7 +48,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             }
             else
             {
-                this.merger.MergeGraph(data.StackRoot, this.graph, context: data);
+                this.merger.MergeGraph(data.StackRoot, this.graph, comparer: Frame.NameEqualityComparer.Instance, context: data);
             }
         }
 

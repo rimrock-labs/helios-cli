@@ -9,13 +9,13 @@ namespace Rimrock.Helios.Analysis.Analyzers
     using Rimrock.Helios.Collection;
     using Rimrock.Helios.Common.Graph;
 
-    [DataAnalyzer(Name = "MemAlloc")]
+    [DataAnalyzer(Name = "Exceptions")]
     [PerfViewAgent.ProfilingDefinition(
-        ClrEvents = new[] { "GC", "Stack" },
+        ClrEvents = new[] { "Exception", "Stack" },
         KernelEvents = new string[0])]
-    internal sealed class MemoryAllocationDataAnalyzer : BaseDataAnalyzer
+    internal sealed class ExceptionsDataAnalyzer : BaseDataAnalyzer
     {
-        public MemoryAllocationDataAnalyzer(ILogger<MemoryAllocationDataAnalyzer> logger, IServiceProvider services)
+        public ExceptionsDataAnalyzer(ILogger<ExceptionsDataAnalyzer> logger, IServiceProvider services)
             : base(logger, services)
         {
         }
@@ -23,20 +23,19 @@ namespace Rimrock.Helios.Analysis.Analyzers
         public override bool OnData(AnalysisContext context, Process process, TraceEvent data)
         {
             bool result = false;
-            if (data is GCAllocationTickTraceData gcData &&
+            if (data is ExceptionTraceData exceptionData &&
                 context.Symbols.TryResolve(data.CallStack(), process, out Frame? stackLeaf, out Frame? stackRoot))
             {
-                Frame type = new(gcData.TypeName);
-                type.AddChild(stackLeaf);
+                Frame type = new(exceptionData.ExceptionType);
+                stackLeaf.AddChild(type);
 
-                ulong allocAmount = (ulong)gcData.AllocationAmount64;
                 stackLeaf.ExclusiveCount += 1;
-                stackLeaf.ExclusiveWeight += allocAmount;
+                stackLeaf.ExclusiveWeight += 1;
                 stackLeaf = type;
                 stackLeaf.ExclusiveCount += 1;
-                stackLeaf.ExclusiveWeight += allocAmount;
+                stackLeaf.ExclusiveWeight += 1;
 
-                ApplyInclusiveMetrics(stackLeaf, weight: allocAmount);
+                ApplyInclusiveMetrics(stackLeaf);
                 this.AddData(new StackData(stackLeaf, stackRoot));
                 result = true;
             }

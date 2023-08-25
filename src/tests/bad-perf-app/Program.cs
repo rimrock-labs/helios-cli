@@ -9,6 +9,13 @@ while (true)
         foreach (var number in Enumerable.Range(0, 100000))
         {
             list.Add($"{number}");
+            try
+            {
+                throw new Exception("Foo");
+            }
+            catch
+            {
+            }
         }
 
         list.Sort();
