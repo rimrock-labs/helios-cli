@@ -26,7 +26,7 @@ namespace Rimrock.Helios.Collector
         private static readonly Option<string> OutputDirectoryOption = new("--output-directory", "Output directory.") { IsRequired = true };
         private static readonly Option<TimeSpan> DurationOption = new("--duration", description: "Duration of collection.", getDefaultValue: () => TimeSpan.FromMinutes(1));
         private static readonly Option<string> SymbolStoreCacheOption = new("--symbol-store-cache", "Path to directory where symbols are cached.");
-        private static readonly Option<string[]> OutputFormatOption = new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { OutputFormatAttribute.GetName(typeof(CsvOutputFormat)) }).FromAmong(OutputFormatAttribute.GetViews().Keys.ToArray());
+        private static readonly Option<string[]> OutputFormatOption = new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { OutputFormatAttribute.GetName(typeof(PerfViewOutputFormat)) }).FromAmong(OutputFormatAttribute.GetViews().Keys.ToArray());
         private static readonly Option<string[]> DataAnalyzerOption = new Option<string[]>("--data-analyzer", description: "Data sets to collect.", getDefaultValue: () => new[] { DataAnalyzerAttribute.GetName(typeof(CpuDataAnalyzer)) }).FromAmong(DataAnalyzerAttribute.GetAnalyzers().Keys.ToArray());
         private static readonly Option<int[]> ProcessIdOption = new("--process-id", "Process identifiers to focus the data to.");
         private static readonly Option<string> TracePathOption = new("--trace-path", "Path to existing trace.");

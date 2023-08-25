@@ -75,7 +75,9 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             writer.WriteLine($"""<Frames Count="{frameLookup.Count}">""");
             foreach (var frame in frameLookup)
             {
-                writer.WriteLine($"""<Frame ID="{frame.Value}">{SecurityElement.Escape(frame.Key.ModuleName)}!{SecurityElement.Escape(frame.Key.MethodName)}</Frame>""");
+                writer.Write($"""<Frame ID="{frame.Value}">""");
+                Frame.DefaultFormatter.Instance.Write(writer, frame.Key, SecurityElement.Escape);
+                writer.WriteLine("</Frame>");
             }
 
             writer.WriteLine("""</Frames>""");

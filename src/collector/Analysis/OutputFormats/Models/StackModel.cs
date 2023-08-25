@@ -10,7 +10,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
     /// <summary>
     /// Stack model class.
     /// </summary>
-    public sealed class StackModel : IDataModel, ICsvModel
+    public sealed class StackModel : IDataModel
     {
         private readonly ILogger<StackModel> logger;
         private readonly Dictionary<StackData, Statistics> data;
@@ -41,38 +41,6 @@ namespace Rimrock.Helios.Analysis.OutputFormats
             else
             {
                 this.logger.LogWarning("Ignoring received data of '{type}' type but that could not be processed.", data.GetType().FullName);
-            }
-        }
-
-        /// <inheritdoc />
-        public IReadOnlyList<string> GetColumnNames() => new[] { "Stack", "Count", "Weight" };
-
-        /// <inheritdoc />
-        public IEnumerable<IReadOnlyList<string>> GetDataRows()
-        {
-            List<string> row = new(4);
-            foreach (KeyValuePair<StackData, Statistics> data in this.data)
-            {
-                row.Clear();
-                StringBuilder builder = new();
-                foreach (Frame frame in data.Key.StackLeaf.EnumerateParentStack())
-                {
-                    builder.Append(frame.ModuleName);
-                    if (!string.IsNullOrEmpty(frame.MethodName))
-                    {
-                        builder.Append('!').Append(frame.MethodName);
-                    }
-
-                    builder.Append(';');
-                }
-
-                row.Add(builder.ToString());
-                builder.Clear();
-
-                row.Add(data.Value.Count.ToString());
-                row.Add(data.Value.Weight.ToString());
-
-                yield return row;
             }
         }
 

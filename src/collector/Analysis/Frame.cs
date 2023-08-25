@@ -3,6 +3,7 @@ namespace Rimrock.Helios.Analysis
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using Rimrock.Helios.Common.Graph;
 
     /// <summary>
@@ -132,6 +133,32 @@ namespace Rimrock.Helios.Analysis
             /// <inheritdoc />
             public int GetHashCode([DisallowNull] Frame obj) =>
                 obj.hashCode;
+        }
+
+        /// <summary>
+        /// Default formatter class.
+        /// </summary>
+        public sealed class DefaultFormatter : IFrameFormatter
+        {
+            /// <summary>
+            /// The instance.
+            /// </summary>
+            public static readonly DefaultFormatter Instance = new();
+
+            private DefaultFormatter()
+            {
+            }
+
+            /// <inheritdoc />
+            public void Write(StreamWriter writer, Frame frame, Func<string, string>? escaper = null)
+            {
+                writer.Write(escaper?.Invoke(frame.ModuleName) ?? frame.ModuleName);
+                if (!string.IsNullOrEmpty(frame.MethodName))
+                {
+                    writer.Write('!');
+                    writer.Write(escaper?.Invoke(frame.MethodName) ?? frame.MethodName);
+                }
+            }
         }
     }
 }
