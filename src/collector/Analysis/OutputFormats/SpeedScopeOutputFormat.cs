@@ -52,7 +52,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
                     writer.WriteLine(',');
                 }
 
-                writer.Write("\"{\"name\": \"");
+                writer.Write("{\"name\": \"");
                 Frame.DefaultFormatter.Instance.Write(writer, framePair.Key);
                 writer.Write("\"}");
                 first1 = false;
