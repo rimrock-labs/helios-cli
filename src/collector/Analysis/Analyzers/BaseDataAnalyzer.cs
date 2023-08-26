@@ -69,6 +69,25 @@ namespace Rimrock.Helios.Analysis.Analyzers
         }
 
         /// <summary>
+        /// Adds the tags as frames.
+        /// </summary>
+        /// <param name="stackRoot">The stack root.</param>
+        /// <param name="tags">The tags.</param>
+        /// <returns>The new stack root.</returns>
+        protected static Frame AddTagsAsFrames(Frame stackRoot, IReadOnlySet<string> tags)
+        {
+            Frame previous = stackRoot;
+            foreach (string tag in tags)
+            {
+                Frame frame = new(tag);
+                frame.AddChild(previous);
+                previous = frame;
+            }
+
+            return previous;
+        }
+
+        /// <summary>
         /// Applies inclusive metrics to stack.
         /// </summary>
         /// <param name="leaf">The stack leaf.</param>

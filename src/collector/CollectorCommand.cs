@@ -31,6 +31,7 @@ namespace Rimrock.Helios.Collector
         private static readonly Option<int[]> ProcessIdOption = new("--process-id", "Process identifiers to focus the data to.");
         private static readonly Option<string> TracePathOption = new("--trace-path", "Path to existing trace.");
         private static readonly Option<bool> ResolveNativeSymbolsOption = new("--resolve-native-symbols", "Resolve native symbols.");
+        private static readonly Option<string[]> TagOption = new("--tag", "Data tags.");
 
         private readonly ILogger<CollectorCommand> logger;
         private readonly HeliosEnvironment environment;
@@ -71,6 +72,7 @@ namespace Rimrock.Helios.Collector
             command.AddOption(SymbolStoreCacheOption);
             command.AddOption(TracePathOption);
             command.AddOption(ResolveNativeSymbolsOption);
+            command.AddOption(TagOption);
             command.SetHandler(this.Collect);
             return new[] { command };
         }
@@ -143,6 +145,7 @@ namespace Rimrock.Helios.Collector
                 WorkingDirectory = workingDirectory,
                 Symbols = symbolStore,
                 OutputFormats = new HashSet<Type>(OutputFormatAttribute.GetViewsByName(context.ParseResult.GetValueForOption(OutputFormatOption))),
+                Tags = new SortedSet<string>(context.ParseResult.GetValueForOption(TagOption) ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase),
             };
 
             HashSet<Type> analyzerTypes = new(DataAnalyzerAttribute.GetAnalyzersByName(context.ParseResult.GetValueForOption(DataAnalyzerOption)));

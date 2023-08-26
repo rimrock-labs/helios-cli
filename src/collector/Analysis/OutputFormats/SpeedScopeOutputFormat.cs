@@ -75,7 +75,7 @@ namespace Rimrock.Helios.Analysis.OutputFormats
 
                     writer.Write('[');
                     first1 = true;
-                    foreach (var f in frame.EnumerateParentStack())
+                    foreach (var f in frame.EnumerateParentStack().Reverse())
                     {
                         if (frames.TryGetValue(f, out int frameIndex))
                         {

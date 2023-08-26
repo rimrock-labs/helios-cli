@@ -33,5 +33,10 @@ namespace Rimrock.Helios.Analysis
         /// Gets the output format types.
         /// </summary>
         public required IReadOnlySet<Type> OutputFormats { get; init; }
+
+        /// <summary>
+        /// Gets the tags.
+        /// </summary>
+        public required IReadOnlySet<string> Tags { get; init; }
     }
 }

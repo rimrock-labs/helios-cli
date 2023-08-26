@@ -28,6 +28,8 @@ namespace Rimrock.Helios.Analysis.Analyzers
                 ApplyInclusiveMetrics(stackLeaf);
                 stackLeaf.ExclusiveCount += 1;
                 stackLeaf.ExclusiveWeight += 1;
+
+                stackRoot = AddTagsAsFrames(stackRoot, context.Tags);
                 this.AddData(new StackData(stackLeaf, stackRoot));
                 result = true;
             }
