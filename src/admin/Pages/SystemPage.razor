@@ -9,16 +9,68 @@
 
 <table>
     <thead>
-        <th>Name</th>
-        <th>Id</th>
+        <tr>
+            <th></th>
+            <th>Id</th>
+            <th>CPU</th>
+            <th>Working Set</th>
+            <th>Name</th>
+        </tr>
     </thead>
     <tbody>
-        @foreach (var process in Process.GetProcesses().OrderBy(_ => _.ProcessName))
+        @foreach (var process in GetProcesses().Where(_ => _.Modules.Contains("mscorlib.dll") || _.Modules.Contains("mscorlib.ni.dll")).OrderBy(_ => _.Name))
         {
             <tr>
-                <td>@process.ProcessName</td>
+                <td><i class="bi bi-eye-fill"></i></td>
                 <td>@process.Id</td>
+                <td>@process.Cpu</td>
+                <td>@process.WorkingSet</td>
+                <td>@process.Name</td>
             </tr>
         }
     </tbody>
 </table>
+
+@code {
+    private static IEnumerable<SimpleProcess> GetProcesses()
+    {
+        foreach (var process in Process.GetProcesses())
+        {
+            SimpleProcess? p = null;
+            try
+            {
+                p = new SimpleProcess()
+                    {
+                        Id = process.Id,
+                        Name = process.ProcessName,
+                        Modules = process.Modules.Cast<ProcessModule>().Select(_ => _.ModuleName).ToHashSet(StringComparer.OrdinalIgnoreCase),
+                        Cpu = process.TotalProcessorTime,
+                        WorkingSet = process.WorkingSet64,
+                    };
+            }
+            catch
+            {
+            }
+
+            if (p != null)
+            {
+                yield return p;
+            }
+
+            process.Dispose();
+        }
+    }
+
+    private class SimpleProcess
+    {
+        public required int Id { get; init; }
+
+        public required string Name { get; init; }
+
+        public required IReadOnlySet<string> Modules { get; init; }
+
+        public required TimeSpan Cpu { get; init; }
+
+        public required long WorkingSet { get; init; }
+    }
+}
