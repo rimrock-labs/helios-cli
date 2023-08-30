@@ -2,11 +2,14 @@
 @namespace Rimrock.Helios.Admin.Pages
 @using System.Diagnostics;
 @using System.Linq;
+@inject ILogger<SystemPage> Logger
 
 <PageTitle>System</PageTitle>
-
 <h1>System</h1>
 
+<span>Page time stamp: @DateTimeOffset.UtcNow</span>
+<InputCheckbox @bind-Value="showOnlyDotnet" @bind-Value:after="OnShowOnlyDotNet" />
+<label>Only show dotnet applications</label>
 <table>
     <thead>
         <tr>
@@ -18,9 +21,9 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var process in GetProcesses().Where(_ => _.Modules.Contains("mscorlib.dll") || _.Modules.Contains("mscorlib.ni.dll")).OrderBy(_ => _.Name))
+        @foreach (var process in this.processes)
         {
-            <tr>
+            <tr @key="process.Id">
                 <td><i class="bi bi-eye-fill"></i></td>
                 <td>@process.Id</td>
                 <td>@process.Cpu</td>
@@ -31,8 +34,45 @@
     </tbody>
 </table>
 
+<Spinner @bind-IsVisible="isBusy" />
+
 @code {
-    private static IEnumerable<SimpleProcess> GetProcesses()
+    private bool showOnlyDotnet;
+
+    private bool isBusy;
+
+    private List<SimpleProcess> processes = new();
+
+    private async Task GetProcessesAsync()
+    {
+        this.Logger.LogTrace("GetProcessesAsync");
+        this.isBusy = true;
+        this.StateHasChanged();
+        await Task.Run(() =>
+        {
+            List<SimpleProcess> processes = new();
+            processes.AddRange(this.GetProcesses().Where(_ => !showOnlyDotnet || _.Modules.Contains("mscorlib.dll") ||
+    _.Modules.Contains("mscorlib.ni.dll")).OrderBy(_ => _.Name));
+            this.processes = processes;
+            this.isBusy = false;
+        });
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Logger.LogTrace("OnInitializedAsync");
+        await this.GetProcessesAsync();
+    }
+
+    private async Task OnShowOnlyDotNet()
+    {
+        this.Logger.LogTrace("OnShowOnlyDotNet");
+        await this.GetProcessesAsync();
+        this.StateHasChanged();
+    }
+
+
+    private IEnumerable<SimpleProcess> GetProcesses()
     {
         foreach (var process in Process.GetProcesses())
         {
@@ -43,7 +83,8 @@
                     {
                         Id = process.Id,
                         Name = process.ProcessName,
-                        Modules = process.Modules.Cast<ProcessModule>().Select(_ => _.ModuleName).ToHashSet(StringComparer.OrdinalIgnoreCase),
+                        Modules = this.showOnlyDotnet ? process.Modules.Cast<ProcessModule>().Select(_ =>
+                        _.ModuleName).ToHashSet(StringComparer.OrdinalIgnoreCase) : new HashSet<string>(),
                         Cpu = process.TotalProcessorTime,
                         WorkingSet = process.WorkingSet64,
                     };
