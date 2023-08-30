@@ -1,0 +1,24 @@
+@page "/system"
+@namespace Rimrock.Helios.Admin.Pages
+@using System.Diagnostics;
+@using System.Linq;
+
+<PageTitle>System</PageTitle>
+
+<h1>System</h1>
+
+<table>
+    <thead>
+        <th>Name</th>
+        <th>Id</th>
+    </thead>
+    <tbody>
+        @foreach (var process in Process.GetProcesses().OrderBy(_ => _.ProcessName))
+        {
+            <tr>
+                <td>@process.ProcessName</td>
+                <td>@process.Id</td>
+            </tr>
+        }
+    </tbody>
+</table>

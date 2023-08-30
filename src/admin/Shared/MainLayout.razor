@@ -1,0 +1,43 @@
+﻿@inherits LayoutComponentBase
+@namespace Rimrock.Helios.Admin.Layouts
+
+<PageTitle>admin</PageTitle>
+
+<div class="page">
+    <header class="navbar">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32">
+            <g id="Layer_1" data-name="Layer 1">
+                <rect x="1" y="1" width="30" height="30" rx="3" style="fill:#fff" />
+                <path id="Mountains"
+                    d="M6.88,20.91l2-5.08L6.54,17.21l-.27.89a.47.47,0,0,1,0,.1C5.63,19,5,20,4.47,20.91ZM3.58,21a.39.39,0,0,0,0,.4.3.3,0,0,0,.29.16H28.15a.33.33,0,0,0,.33-.23.32.32,0,0,0-.1-.36l-3.12-2.67-1.49-2.83a.28.28,0,0,0-.08-.11l-5.27-4.86a.35.35,0,0,0-.2-.1.34.34,0,0,0-.2,0l-5.11,2.67a.3.3,0,0,0-.16.17l-.34.76-1.68,1.36-1-.65a.49.49,0,0,0-.17-.06.38.38,0,0,0-.19.05L6.1,16.69a.29.29,0,0,0-.16.2l-.3,1C4.94,18.87,4.3,20,3.58,21Zm7.74-5.21,1.23-1,1.08,2.56-2.31-1.56Zm1.74-1.54.26-.6,4.51-2.35,0,1.64L14.46,17.6l-1.4-3.33Zm5.42-1.41,0-1.34,3.07,2.82-3.09-1.48Zm4.74,3,1.36,2.59-2.06,2.19-3.61-6.85,4.31,2.07Zm-5.13-2.18,3.79,7.2H13.94l.75-2.47,3.4-4.73ZM14,18.43c-.15.48-.75,2.48-.75,2.48H7.61l2.13-5.35L14,18.43ZM25,19l2.22,1.91h-4L25,19Z"
+                    style="fill:#010101;fill-rule:evenodd" />
+            </g>
+        </svg>
+        <h3>Rimrock Helios - Admin</h3>
+    </header>
+    <aside>
+        <ul>
+            <li>
+                <NavLink href="system">
+                    <i class="bi bi-cpu" />
+                    &nbsp;System
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="collections">
+                    <i class="bi bi-archive" />
+                    &nbsp;Collections
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="settings">
+                    <i class="bi bi-gear" />
+                    &nbsp;Settings
+                </NavLink>
+            </li>
+        </ul>
+    </aside>
+    <main>
+        @Body
+    </main>
+</div>
