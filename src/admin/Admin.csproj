@@ -7,5 +7,49 @@
     <RootNamespace>Rimrock.Helios.Admin</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+<!-- 
+  <ItemGroup>
+    <Content Update="**\bootstrap\**\*">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+    <Content Update="**\css\bootstrap.min.css">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+    <Content Update="**\js\bootstrap.min.js">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup> -->
 
+  <ItemGroup>
+    <StaticWebAsset Include="$(Pkgbootstrap)\contentFiles\any\any\wwwroot\css\bootstrap.min.css">
+      <SourceType>Package</SourceType>
+      <SourceId>bootstrap</SourceId>
+      <ContentRoot>$(Pkgbootstrap)\contentFiles\any\any\wwwroot\</ContentRoot>
+      <BasePath>css</BasePath>
+      <RelativePath>bootstrap.min.css</RelativePath>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$(Pkgbootstrap)\contentFiles\any\any\wwwroot\js\bootstrap.min.js">
+      <SourceType>Package</SourceType>
+      <SourceId>bootstrap</SourceId>
+      <ContentRoot>$(Pkgbootstrap)\contentFiles\any\any\wwwroot\</ContentRoot>
+      <BasePath>js</BasePath>
+      <RelativePath>bootstrap.min.js</RelativePath>
+    </StaticWebAsset>
+  </ItemGroup>
+
+  <Target Name="MessageBeforePublish" BeforeTargets="BeforePublish">
+    <Message Text="@(StaticWebAsset)" />
+    <Message Text="%(StaticWebAsset.Identity) %(StaticWebAsset.ContentRoot) %(StaticWebAsset.BasePath) %(StaticWebAsset.RelativePath)" />
+    <!-- <ItemGroup>
+      <AssetToRemove Include="@(StaticWebAsset)" Condition="'%(SourceId)' == 'bootstrap'" />
+      <StaticWebAsset Remove="@(AssetToRemove)" />
+      <AssetToInclude Include="@(StaticWebAsset)" Condition="'%(SourceId)' == 'bootstrap' and '%(RelativePath)' == 'bootstrap.min.css'" />
+      <AssetToInclude Include="@(StaticWebAsset)" Condition="'%(SourceId)' == 'bootstrap' and '%(RelativePath)' == 'bootstrap.min.js'" />
+      <StaticWebAsset Include="@(AssetToInclude)" />
+    </ItemGroup> -->
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="bootstrap" Version="5.3.1" ExcludeAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
 </Project>

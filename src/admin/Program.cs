@@ -1,7 +1,13 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+var options = new WebApplicationOptions()
+{
+    Args = args,
+    // ContentRootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+    // WebRootPath = "wwwroot",
+};
+
+var builder = WebApplication.CreateBuilder(options);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
