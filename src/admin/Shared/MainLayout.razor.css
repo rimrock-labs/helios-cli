@@ -1,41 +1,43 @@
 .page {
     display: grid;
-    grid-template-rows: max-content auto;
-    grid-template-columns: max-content auto;
+    grid-template-rows: var(--navbar-height) auto;
+    grid-template-columns: 200px auto;
+    height: 100vh;
 }
 
 .logo {
     margin-right: 10px;
 }
 
-.navbar {
+header.navbar {
+    height: var(--navbar-height);
     grid-row: 1;
     grid-column: span 2;
     padding-left: 10px;
-    background-color: rgb(79 70 229);
+    background-color: var(--theme-color);
     color: white;
     display: flex;
     justify-content: center;
-    height: 60px;
 }
 
-ul {
-    padding: 0;
-    margin: 20;
+header.navbar h3 {
+    margin: 0;
 }
 
 aside {
     grid-row: 2;
     grid-column: 1;
-    background-color: whitesmoke;
-    height: calc();
+    background-color: var(--theme-gray);
     float: right;
+    display: flex;
+    align-items: stretch;
 }
 
 aside ul {
     list-style: none;
     margin: 0;
     padding: 0;
+    width: 100%;
 }
 
 aside li {
@@ -45,7 +47,7 @@ aside li {
 }
 
 ::deep aside li {
-    background-color: whitesmoke;
+    background-color: var(--theme-gray);
     transition: background-color 0.5s;
 }
 
@@ -57,7 +59,6 @@ aside li {
 ::deep aside li:hover {
     background-color: gainsboro;
 }
-
 
 main {
     grid-row: 2;

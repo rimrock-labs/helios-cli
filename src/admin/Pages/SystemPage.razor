@@ -7,9 +7,13 @@
 <PageTitle>System</PageTitle>
 <h1>System</h1>
 
-<span>Page time stamp: @DateTimeOffset.UtcNow</span>
 <InputCheckbox @bind-Value="showOnlyDotnet" @bind-Value:after="OnShowOnlyDotNet" />
 <label>Only show dotnet applications</label>
+<form class="d-flex" role="search" @onsubmit="FilterSubmit">
+    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" @bind-value="filterText" />
+    <button class="btn btn-outline-success" type="submit">Search</button>
+</form>
+<p>Page time stamp: @DateTimeOffset.UtcNow</p>
 <table>
     <thead>
         <tr>
@@ -39,9 +43,19 @@
 @code {
     private bool showOnlyDotnet;
 
+    private string? filterText;
+
     private bool isBusy;
 
     private List<SimpleProcess> processes = new();
+
+    private async Task<bool> FilterSubmit()
+    {
+        this.Logger.LogTrace("FilterSubmit {filter}", this.filterText);
+        await this.GetProcessesAsync();
+        this.StateHasChanged();
+        return false;
+    }
 
     private async Task GetProcessesAsync()
     {
@@ -52,7 +66,8 @@
         {
             List<SimpleProcess> processes = new();
             processes.AddRange(this.GetProcesses().Where(_ => !showOnlyDotnet || _.Modules.Contains("mscorlib.dll") ||
-    _.Modules.Contains("mscorlib.ni.dll")).OrderBy(_ => _.Name));
+    _.Modules.Contains("mscorlib.ni.dll")).Where(_ => string.IsNullOrEmpty(this.filterText) ||
+    _.Name.Contains(this.filterText, StringComparison.OrdinalIgnoreCase)).OrderBy(_ => _.Name));
             this.processes = processes;
             this.isBusy = false;
         });
