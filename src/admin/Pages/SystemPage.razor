@@ -9,10 +9,10 @@
 
 <InputCheckbox @bind-Value="showOnlyDotnet" @bind-Value:after="OnShowOnlyDotNet" />
 <label>Only show dotnet applications</label>
-<form class="d-flex" role="search" @onsubmit="FilterSubmit">
-    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" @bind-value="filterText" />
+<form role="search" @onsubmit="FilterSubmit">
+    <input class="form-control" type="search" placeholder="Filter Processes" @bind-value="filterText" />
     <button class="btn btn-outline-success" type="submit">Search</button>
-</form>
+</form>1
 <p>Page time stamp: @DateTimeOffset.UtcNow</p>
 <table>
     <thead>
