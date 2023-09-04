@@ -5,38 +5,42 @@
 @inject ILogger<SystemPage> Logger
 
 <PageTitle>System</PageTitle>
-<h1>System</h1>
 
-<InputCheckbox @bind-Value="showOnlyDotnet" @bind-Value:after="OnShowOnlyDotNet" />
-<label>Only show dotnet applications</label>
-<form role="search" @onsubmit="FilterSubmit">
-    <input class="form-control" type="search" placeholder="Filter Processes" @bind-value="filterText" />
-    <button class="btn btn-outline-success" type="submit">Search</button>
-</form>1
-<p>Page time stamp: @DateTimeOffset.UtcNow</p>
-<table>
-    <thead>
-        <tr>
-            <th></th>
-            <th>Id</th>
-            <th>CPU</th>
-            <th>Working Set</th>
-            <th>Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var process in this.processes)
-        {
-            <tr @key="process.Id">
-                <td><i class="bi bi-eye-fill"></i></td>
-                <td>@process.Id</td>
-                <td>@process.Cpu</td>
-                <td>@process.WorkingSet</td>
-                <td>@process.Name</td>
+<div class="mb-5">
+    <form class="w-auto float-right" role="search" @onsubmit="FilterSubmit">
+        <InputCheckbox @bind-Value="showOnlyDotnet" @bind-Value:after="OnShowOnlyDotNet" />
+        <label>Only show dotnet applications</label>
+        <input class="rounded border w-fit px-2 focus:outline-none" type="search" placeholder="Filter Processes"
+        @bind-value="filterText" />
+        <button class="bg-gray-700 rounded px-2 text-white hover:bg-blue-500" type="submit">Search</button>
+    </form>
+</div>
+<section>
+    <strong>Processes</strong>
+    <table class="table-auto w-full">
+        <thead class="bg-gray-800 text-white text-left">
+            <tr>
+                <th></th>
+                <th>Id</th>
+                <th>CPU</th>
+                <th>Working Set</th>
+                <th>Name</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var process in this.processes)
+            {
+                <tr @key="process.Id">
+                    <td><i class="bi bi-eye-fill cursor-pointer"></i></td>
+                    <td>@process.Id</td>
+                    <td>@process.Cpu</td>
+                    <td>@process.WorkingSet</td>
+                    <td>@process.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
 
 <Spinner @bind-IsVisible="isBusy" />
 

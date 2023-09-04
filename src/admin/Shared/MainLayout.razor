@@ -1,11 +1,12 @@
 ﻿@inherits LayoutComponentBase
 @namespace Rimrock.Helios.Admin.Layouts
 
-<PageTitle>admin</PageTitle>
-
-<div class="page">
-    <header class="navbar">
-        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32">
+<nav class="bg-blue-500 p-4 flex items-center justify-between sticky">
+    <div>
+        <h1 class="text-white text-xl font-semibold">Helios</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+        <svg class="col-start-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32">
             <g id="Layer_1" data-name="Layer 1">
                 <rect x="1" y="1" width="30" height="30" rx="3" style="fill:#fff" />
                 <path id="Mountains"
@@ -13,37 +14,42 @@
                     style="fill:#010101;fill-rule:evenodd" />
             </g>
         </svg>
-        <h3>Rimrock Helios - Admin</h3>
-    </header>
-    <aside>
-        <ul>
-            <li>
-                <NavLink href="system">
-                    <i class="bi bi-cpu" />
-                    &nbsp;System
-                </NavLink>
-            </li>
-            <li>
-                <NavLink href="collections">
-                    <i class="bi bi-archive" />
-                    &nbsp;Collections
-                </NavLink>
-            </li>
-            <li>
-                <NavLink href="viewer">
-                    <i class="bi bi-stack" />
-                    &nbsp;Viewer
-                </NavLink>
-            </li>
-            <li>
-                <NavLink href="settings">
-                    <i class="bi bi-gear" />
-                    &nbsp;Settings
-                </NavLink>
-            </li>
-        </ul>
+    </div>
+</nav>
+
+<div class="flex flex-row">
+    <aside class="bg-gray-800 text-white w-64 min-h-screen p-4">
+        <nav>
+            <ul class="space-y-2">
+                <li class="flex items-center justify-between p-2 hover:bg-gray-700 mr-2 rounded">
+                    <NavLink href="system">
+                        <i class="bi bi-cpu" />
+                        <span>System</span>
+                    </NavLink>
+                </li>
+                <li class="flex items-center justify-between p-2 hover:bg-gray-700 mr-2 rounded">
+                    <NavLink href="collections">
+                        <i class="bi bi-archive" />
+                        <span>Collections</span>
+                    </NavLink>
+                </li>
+                <li class="flex items-center justify-between p-2 hover:bg-gray-700 mr-2 rounded">
+                    <NavLink href="viewer">
+                        <i class="bi bi-stack" />
+                        &nbsp;Viewer
+                    </NavLink>
+                </li>
+                <li class="flex items-center justify-between p-2 hover:bg-gray-700 mr-2 rounded">
+                    <NavLink href="settings">
+                        <i class="bi bi-gear" />
+                        &nbsp;Settings
+                    </NavLink>
+                </li>
+            </ul>
+        </nav>
     </aside>
-    <main>
+
+    <main class="container mx-auto p-4 h-full">
         @Body
     </main>
 </div>
