@@ -28,7 +28,8 @@ namespace Rimrock.Helios.Collector
         private static readonly Option<string> SymbolStoreCacheOption = new("--symbol-store-cache", "Path to directory where symbols are cached.");
         private static readonly Option<string[]> OutputFormatOption = new Option<string[]>("--output-format", description: "Output format.", getDefaultValue: () => new[] { OutputFormatAttribute.GetName(typeof(PerfViewOutputFormat)) }).FromAmong(OutputFormatAttribute.GetViews().Keys.ToArray());
         private static readonly Option<string[]> DataAnalyzerOption = new Option<string[]>("--data-analyzer", description: "Data sets to collect.", getDefaultValue: () => new[] { DataAnalyzerAttribute.GetName(typeof(CpuDataAnalyzer)) }).FromAmong(DataAnalyzerAttribute.GetAnalyzers().Keys.ToArray());
-        private static readonly Option<int[]> ProcessIdOption = new("--process-id", "Process identifiers to focus the data to.");
+        private static readonly Option<int[]> ProcessIdOption = new("--process-id", "Process identifiers to focus data analysis to.");
+        private static readonly Option<string[]> ProcessNameOptions = new("--process-name", "Process name to focus data analysis to.");
         private static readonly Option<string> TracePathOption = new("--trace-path", "Path to existing trace.");
         private static readonly Option<bool> ResolveNativeSymbolsOption = new("--resolve-native-symbols", "Resolve native symbols.");
         private static readonly Option<string[]> TagOption = new("--tag", "Data tags.");
@@ -67,6 +68,7 @@ namespace Rimrock.Helios.Collector
             command.AddOption(OutputDirectoryOption);
             command.AddOption(DataAnalyzerOption);
             command.AddOption(ProcessIdOption);
+            command.AddOption(ProcessNameOptions);
             command.AddOption(OutputFormatOption);
             command.AddOption(DurationOption);
             command.AddOption(SymbolStoreCacheOption);
@@ -158,6 +160,7 @@ namespace Rimrock.Helios.Collector
 
             this.logger.LogInformation("Created {number} analyzers.", analysisContext.Analyzers.Count);
 
+            HashSet<string> processNames = new(context.ParseResult.GetValueForOption(ProcessNameOptions) ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
             HashSet<int> processIds = new(context.ParseResult.GetValueForOption(ProcessIdOption) ?? Enumerable.Empty<int>());
 
             this.logger.LogInformation("Starting analysis...");
@@ -181,7 +184,8 @@ namespace Rimrock.Helios.Collector
             {
                 if (processIds.Count == 0 || processIds.Contains(data.ProcessID))
                 {
-                    if (traceLog.ProcessMap.TryGetProcess(data.ProcessID, data.TimeStampRelativeMSec, out Process? process))
+                    if (traceLog.ProcessMap.TryGetProcess(data.ProcessID, data.TimeStampRelativeMSec, out Process? process) &&
+                        (processNames.Count == 0 || processNames.Contains(data.ProcessName) || processNames.Contains(process.Name)))
                     {
                         for (int i = 0; i < analysisContext.Analyzers.Count; i++)
                         {
