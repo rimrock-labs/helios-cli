@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../common/Common.csproj" />
+    <ProjectReference Include="../data-access/Data-Access.csproj" />
     <PackageReference Include="PerfView" Version="[3.1.3]" ExcludeAssets="all" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="[3.1.3]" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(Microsoft_Extensions_Loggin)" />

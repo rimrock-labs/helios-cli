@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
+
+  <PropertyGroup>
+    <AssemblyName>Rimrock.Helios.DataAccess</AssemblyName>
+    <RootNamespace>Rimrock.Helios.DataAccess</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../common/Common.csproj" />
+  </ItemGroup>
+
+</Project>

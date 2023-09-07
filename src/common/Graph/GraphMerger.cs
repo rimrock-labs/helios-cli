@@ -1,6 +1,7 @@
 namespace Rimrock.Helios.Common.Graph
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
 
     /// <summary>
     /// <see cref="INode{TNode}"/> graph merger class.
@@ -21,7 +22,8 @@ namespace Rimrock.Helios.Common.Graph
         public void MergeGraph(TNode sourceRoot, TNode targetRoot, IEqualityComparer<TNode>? comparer = null, TContext? context = null)
         {
             comparer ??= EqualityComparer<TNode>.Default;
-            Stack<(TNode Source, TNode Target)> stack = new();
+            var stack = Pool<Stack<(TNode Source, TNode Target)>>.Borrow();
+            stack.Clear();
             stack.Push((sourceRoot, targetRoot));
             while (stack.Count > 0)
             {
@@ -72,6 +74,9 @@ namespace Rimrock.Helios.Common.Graph
                     }
                 }
             }
+
+            Debug.Assert(stack.Count == 0, "Stack not empty.");
+            Pool<Stack<(TNode Source, TNode Target)>>.Return(ref stack);
         }
 
         /// <summary>

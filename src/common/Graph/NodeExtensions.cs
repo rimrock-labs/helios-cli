@@ -1,6 +1,7 @@
 namespace Rimrock.Helios.Common.Graph
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -8,6 +9,78 @@ namespace Rimrock.Helios.Common.Graph
     /// </summary>
     public static class NodeExtensions
     {
+        /// <summary>
+        /// Enumerates the graph breadth-first.
+        /// </summary>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <param name="node">The node.</param>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<TNode> EnumerateBreadthFirst<TNode>(this TNode node)
+            where TNode : class?, INode<TNode>
+        {
+            var queue = Pool<Queue<TNode>>.Borrow();
+            queue.Clear();
+
+            yield return node;
+
+            foreach (var child in node.EnumerateChildren())
+            {
+                queue.Enqueue(child);
+            }
+
+            while (queue.Count > 0)
+            {
+                int level = queue.Count;
+                while (level-- > 0 &&
+                       queue.TryDequeue(out TNode? node2))
+                {
+                    yield return node2;
+
+                    foreach (var child in node2.EnumerateChildren())
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+
+            Debug.Assert(queue.Count == 0, "Queue not empty.");
+            Pool<Queue<TNode>>.Return(ref queue);
+        }
+
+        /// <summary>
+        /// Enumerates the siblings.
+        /// </summary>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <param name="node">The node.</param>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<TNode> EnumerateSiblings<TNode>(this TNode node)
+            where TNode : class?, INode<TNode>
+        {
+            node = node.Parent?.Child ?? node;
+            while (node.Sibling != null)
+            {
+                yield return node;
+                node = node.Sibling;
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the children.
+        /// </summary>
+        /// <typeparam name="TNode">The node type.</typeparam>
+        /// <param name="node">The node.</param>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<TNode> EnumerateChildren<TNode>(this TNode node)
+            where TNode : class?, INode<TNode>
+        {
+            TNode? child = node.Child;
+            while (child != null)
+            {
+                yield return child;
+                child = child.Sibling;
+            }
+        }
+
         /// <summary>
         /// Clones the stack from the leaf.
         /// </summary>
